@@ -1,0 +1,25 @@
+package idris2-curl
+
+authors    = "MarcelineVQ"
+version    = "0.4.1.0"
+readme     = "README.md"
+
+homepage   = "https://github.com/MarcelineVQ/idris2-elab-deriving"
+sourceloc  = "https://github.com/MarcelineVQ/idris2-elab-deriving.git"
+bugtracker = "https://github.com/MarcelineVQ/idris2-elab-deriving/issues"
+
+license    = "CC0 (refer to LICENSE file)"
+brief      = "Curl bindings developed for libcurl 7.68.0"
+
+modules = Network.Curl.Easy
+        , Network.Curl.Multi
+        , Network.Curl.Option
+        , Network.Curl.Prim
+        , Network.Curl.Types
+
+sourcedir = "src"
+
+main = Network.Curl.Prim
+-- executable = exefaf
+
+depends = base, contrib, network, bytes
