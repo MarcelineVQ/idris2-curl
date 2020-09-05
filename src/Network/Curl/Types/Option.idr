@@ -1,6 +1,6 @@
-module Network.Curl.Option
+module Network.Curl.Types.Option
 
-import Network.Curl.Types
+import Network.Curl.Types.CurlCode
 
 public export
 data OptType
