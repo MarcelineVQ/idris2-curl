@@ -1,11 +1,11 @@
 Idris2 Curl Bindings
 =====
 
-I really don't want to write my own HTTP just now so we'll use curl
+I really don't want to write my own HTTP lib, so here's curl.  
+This will provide the Easy interface of direct all-at-once actions and the Multi interface which exposes the full power of curl.
 
-This is a package for deriving implementations of common functions and interfaces in [Idris2](https://github.com/idris-lang/Idris2). It's intended to alleviate the tedium of writing your own instances, especially for things like newtypes which is just a whole lot of copypasting of wrapping.
+Further this will provide methods to use curl as a replacement for Idris' `network` package when used for internet connections.
 
-It's pretty basic just now but so is elaborator reflection.
 
 Version
 -------

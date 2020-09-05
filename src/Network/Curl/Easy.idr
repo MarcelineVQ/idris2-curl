@@ -23,6 +23,12 @@ then you cleanup the easy-session's handle and libcurl is entirely off the hook!
 
 -- withEasy = init *> do <* cleanup
 
+import Network.Curl.Option
+import Network.Curl.Types
+import Network.Curl.Prim
 
 
+export
+easyFetchUrl : HasIO io => (url : String) -> io String
+easyFetchUrl = ?dsdfs
 

@@ -24,7 +24,7 @@ ToCode OptType where
 public export
 paramTy : OptType -> Type
 paramTy CURLOPTTYPE_LONG = Int
-paramTy CURLOPTTYPE_FUNCTIONPOINT = String -> Int -> Int -> IO Int
+paramTy CURLOPTTYPE_FUNCTIONPOINT = String -> Int -> Int -> AnyPtr -> IO Int
 paramTy CURLOPTTYPE_OBJECTPOINT = AnyPtr
 paramTy CURLOPTTYPE_STRINGPOINT = String
 paramTy CURLOPTTYPE_SLISTPOINT = AnyPtr

@@ -7,14 +7,6 @@ x <&> f = f <$> x
 
 infixl 4 <$,$>
 
-export
-(<$) : Functor f => a -> f b -> f a
-x <$ y = map (const x) y
-
-export
-($>) : Functor f => f a -> b -> f b
-($>) = flip (<$)
-
 -- For when Lazy is causing type problems
 infixr 4 &&|
 export
