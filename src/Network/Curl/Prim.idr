@@ -4,7 +4,6 @@ module Network.Curl.Prim
 
 import Control.App
 import Network.Curl.Types
-import Network.Curl.Option
 
 -- import Data.Bytes.Strict
 -- import Data.Word.Word8

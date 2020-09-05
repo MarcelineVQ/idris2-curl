@@ -1,7 +1,7 @@
 package curl
 
 authors    = "MarcelineVQ"
-version    = "0.5.2.0"
+version    = "0.6.2.0"
 readme     = "README.md"
 
 homepage   = "https://github.com/MarcelineVQ/idris2-elab-deriving"
@@ -17,6 +17,9 @@ modules = Network.Curl.Easy
         , Network.Curl.Types
         , Network.Curl.Types.CurlCode
         , Network.Curl.Types.Option
+        
+        , EnumDerive
+        , Util
 
 sourcedir = "src"
 

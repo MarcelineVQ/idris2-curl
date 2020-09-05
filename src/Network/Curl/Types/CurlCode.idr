@@ -179,7 +179,7 @@ ToCode GlobalFlag where
 
 export
 ToCode CurlCode where
-  toCode = enumToInt [0..96] -- No reason to write it ourselves
+  toCode = enumTo [0..96] -- No reason to write it ourselves
 
 export
 FromCode CurlCode where
