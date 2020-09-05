@@ -4,9 +4,9 @@ authors    = "MarcelineVQ"
 version    = "0.6.2.0"
 readme     = "README.md"
 
-homepage   = "https://github.com/MarcelineVQ/idris2-elab-deriving"
-sourceloc  = "https://github.com/MarcelineVQ/idris2-elab-deriving.git"
-bugtracker = "https://github.com/MarcelineVQ/idris2-elab-deriving/issues"
+homepage   = "https://github.com/MarcelineVQ/idris2-curl"
+sourceloc  = "https://github.com/MarcelineVQ/idris2-curl.git"
+bugtracker = "https://github.com/MarcelineVQ/idris2-curl/issues"
 
 license    = "CC0 (refer to LICENSE file)"
 brief      = "Curl bindings developed for libcurl 7.68.0"
