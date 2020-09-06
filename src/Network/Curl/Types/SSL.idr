@@ -32,5 +32,6 @@ Ord CurlSSLBackend where
 ToCode CurlSSLBackend where
   toCode = enumTo [0,1,2,3, 5,6,7,8,9,10,11,12,13]
 
-FromCode CurlSSLBackend where -- bad
-  fromCode = enumFrom [0,1,2,3, 5,6,7,8,9,10,11,12,13] $ lie_idris_crash "CURLcode was not a valid code."
+FromCode CurlSSLBackend where
+  unsafeFromCode = unsafeEnumFrom [0,1,2,3, 5,6,7,8,9,10,11,12,13]
+  fromCode = enumFrom [0,1,2,3, 5,6,7,8,9,10,11,12,13]

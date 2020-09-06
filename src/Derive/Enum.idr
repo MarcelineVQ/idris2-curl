@@ -1,5 +1,7 @@
 module Derive.Enum
 
+import Util
+
 import public Language.Reflection
 %language ElabReflection
 
@@ -117,18 +119,30 @@ enumTo xs = do
 ||| figure out how to generalize from Int
 export
 %macro
-enumFrom : List Int -> x -> Elab (Int -> x)
-enumFrom xs catchall = do
+unsafeEnumFrom : List Int -> Elab (Int -> x)
+unsafeEnumFrom xs = do
     Just (IPi _ _ _ _ `(Int) (IVar _ ty)) <- goal
       | _ => fail "Required type is not: Int -> x"
     cns <- conNames ty
     clauses <- traverse clause (zip xs cns)
-    let catchall_clause =  [PatClause eFC `(_) !(quote catchall)]
-    check `(\lam => ~(ICase eFC `(lam) `(_) (clauses ++ catchall_clause)))
+    check `(\lam => assert_total $ ~(ICase eFC `(lam) `(_) clauses))
   where
     clause : (a, Name) -> Elab Clause
     clause (i,n) = pure $ PatClause eFC !(quote i) (IVar eFC n)
 
+export
+%macro
+enumFrom : List Int -> Elab (Int -> Maybe x)
+enumFrom xs = do
+    Just (IPi _ _ _ _ `(Int) `(Prelude.Types.Maybe ~(IVar _ ty))) <- goal
+      | _ => fail "Required type is not: Int -> Maybe x"
+    cns <- conNames ty
+    clauses <- traverse clause (zip xs cns)
+    let catchall_clause =  [PatClause eFC `(_) `(Nothing)]
+    check `(\lam => ~(ICase eFC `(lam) `(_) (clauses ++ catchall_clause)))
+  where
+    clause : (a, Name) -> Elab Clause
+    clause (i,n) = pure $ PatClause eFC !(quote i) `(Just ~(IVar eFC n))
 
 -------------------------------------------------
 -- Examples
@@ -143,7 +157,8 @@ interface ToCode' a where
 
 private
 interface FromCode' a where
-  fromCode : Int -> a
+  fromCode : Int -> Maybe a
+  unsafeFromCode : Int -> a
 
 private
 Show Foo where
@@ -163,7 +178,8 @@ ToCode' Foo where
 
 private
 FromCode' Foo where
-  fromCode = enumFrom [0] Baz
+  unsafeFromCode = unsafeEnumFrom [0,1]
+  fromCode = enumFrom [0,1]
 
 eqTest1 : Baz == Baz = True
 eqTest1 = Refl
@@ -174,11 +190,17 @@ eqTest2 = Refl
 enumToTest1 : toCode Baz == 1 = True
 enumToTest1 = Refl
 
-enumFromTest1 : fromCode 0 == Biz = True
+enumFromTest1 : unsafeFromCode 0 == Biz = True
 enumFromTest1 = Refl
 
-enumFromTest2 : fromCode (-12345) == Baz = True
-enumFromTest2 = Refl
+enumFromTest2 : unsafeFromCode (-12345) == Baz = True
+enumFromTest2 = ?crash
+
+enumFromSafeTest1 : fromCode 0 == Just Biz = True
+enumFromSafeTest1 = Refl
+
+enumFromSafeTest2 : fromCode 3 == Nothing {ty=Foo} = True
+enumFromSafeTest2 = Refl
 
 showTest1 : show Baz == "Baz" = True
 showTest1 = Refl

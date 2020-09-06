@@ -22,7 +22,7 @@ prim_curl_global_init : Int -> PrimIO Int
 ||| version. CURL_GLOBAL_ALL = 3 on my system
 export
 curl_global_init : HasIO io => io CurlCode
-curl_global_init = fromCode <$> primIO (prim_curl_global_init 3)
+curl_global_init = unsafeFromCode <$> primIO (prim_curl_global_init 3)
 
 %runElab makeHasIO "curl_global_cleanup" Export
            ["C:curl_global_init,libcurl,curl/curl.h"]

@@ -186,7 +186,8 @@ ToCode CurlCode where
 
 export
 FromCode CurlCode where -- bad, FromCode should really be Maybe Int
-  fromCode = enumFrom [0..96] $ lie_idris_crash "CURLcode was not a valid code."
+  unsafeFromCode = unsafeEnumFrom [0..96]
+  fromCode = enumFrom [0..96]
 
   -- fromCode 0 = CURLE_OK
   -- fromCode 1 = CURLE_UNSUPPORTED_PROTOCOL

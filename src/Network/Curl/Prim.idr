@@ -79,11 +79,11 @@ prim_curl_easy_setopt_fcallback : Ptr HandlePtr -> Int -> (String -> Int -> Int 
 export
 curl_easy_setopt : HasIO io => {ty : _} -> CurlHandle Easy -> CurlOption ty -> paramTy ty -> io CurlCode
 curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_LONG} v
-  = fromCode <$> primIO (prim_curl_easy_setopt_long h (toCode op) v)
+  = unsafeFromCode <$> primIO (prim_curl_easy_setopt_long h (toCode op) v)
 curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_STRINGPOINT} v
-  = fromCode <$> primIO (prim_curl_easy_setopt_string h (toCode op) v)
+  = unsafeFromCode <$> primIO (prim_curl_easy_setopt_string h (toCode op) v)
 curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_FUNCTIONPOINT} v
-  = map fromCode . primIO $ prim_curl_easy_setopt_fcallback h (toCode op) (\a,b,c,d => toPrim (v a b c d))
+  = map unsafeFromCode . primIO $ prim_curl_easy_setopt_fcallback h (toCode op) (\a,b,c,d => toPrim (v a b c d))
 curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_OBJECTPOINT} v = ?dsf_3
 curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_SLISTPOINT} v = ?dsf_5
 curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_OFF_T} v = ?dsf_6
@@ -95,7 +95,7 @@ prim_curl_easy_perform : Ptr HandlePtr -> PrimIO Int
 
 export
 curl_easy_perform : HasIO io => CurlHandle Easy -> io CurlCode
-curl_easy_perform (MkH ptr) = fromCode <$> primIO (prim_curl_easy_perform ptr)
+curl_easy_perform (MkH ptr) = unsafeFromCode <$> primIO (prim_curl_easy_perform ptr)
 
 -- every init must have a cleanup, but we can re-use things before cleanup too,
 -- so allow for this
