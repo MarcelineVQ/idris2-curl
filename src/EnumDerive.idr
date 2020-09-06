@@ -5,6 +5,8 @@ import public Language.Reflection
 %language ElabReflection
 
 -- Tooling for basic interfaces of Enumeration types, e.g. data Foo = Biz | Baz
+-- Use of this module automatically imports Language.Reflection and requires
+-- %language ElabReflection to be enabled below your imports.
 -- Examples at module bottom
 
 -- nat casting is slow
@@ -41,7 +43,7 @@ export
 %macro
 showEnum : Elab (x -> String)
 showEnum = do
-    Just (IPi _ _ _ n@(Just varnam) tyimp@(IVar _ ty) `(String)) <- goal
+    Just (IPi _ _ _ _ tyimp@(IVar _ ty) `(String)) <- goal
       | _ => fail "Required type is not: x -> String"
     cns <- conNames ty
     check `(\lam => ~(ICase eFC `(lam) tyimp (clause <$> cns)))
@@ -74,24 +76,6 @@ eqEnum = do
                   Biz => True
                   _ => False -}
 
-||| Assigns an Int value to each constructor.
-||| Provide a more custom list to skip some elements. e.g.
-||| enumToInt ([0..12] ++ [14..30]) would skip assigning 13
-export
-%macro
-enumTo : List Int -> Elab (x -> Int)
-enumTo xs = do
-    Just (IPi _ _ _ n@(Just varnam) tyimp@(IVar _ ty) `(Int)) <- goal
-      | _ => fail "Required type is not: x -> Int"
-    cns <- conNames ty
-    False <- pure $ length xs < length cns
-      | True => fail "Provided list is too short to cover all constructors."
-    clauses <- traverse clause (zip xs cns)
-    check `(\lam => ~(ICase eFC `(lam) tyimp clauses))
-  where
-    clause : (a, Name) -> Elab Clause
-    clause (i,n) = pure $ PatClause eFC (IVar eFC n) !(quote i)
-
 ||| This orders enum constructors by their position in the datatype
 ||| data Foo = Biz | Baz     Biz < Baz
 export
@@ -109,6 +93,24 @@ compareEnum = do
     check `(\a,b => compare {ty=Int} ~(toInt `(a)) ~(toInt `(b)))
   where
     clause : (Int, Name) -> Elab Clause
+    clause (i,n) = pure $ PatClause eFC (IVar eFC n) !(quote i)
+
+||| Assigns an Int value to each constructor.
+||| Provide a more custom list to skip some elements. e.g.
+||| enumToInt ([0..12] ++ [14..30]) would skip assigning 13
+export
+%macro
+enumTo : List Int -> Elab (x -> Int)
+enumTo xs = do
+    Just (IPi _ _ _ _ tyimp@(IVar _ ty) `(Int)) <- goal
+      | _ => fail "Required type is not: x -> Int"
+    cns <- conNames ty
+    False <- pure $ length xs < length cns
+      | True => fail "Provided list is too short to cover all constructors."
+    clauses <- traverse clause (zip xs cns)
+    check `(\lam => ~(ICase eFC `(lam) tyimp clauses))
+  where
+    clause : (a, Name) -> Elab Clause
     clause (i,n) = pure $ PatClause eFC (IVar eFC n) !(quote i)
 
 -------------------------------------------------
