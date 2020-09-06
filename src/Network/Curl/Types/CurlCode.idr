@@ -6,6 +6,14 @@ import EnumDerive
 %language ElabReflection
 
 public export
+interface ToCode a where
+  toCode : a -> Int
+
+public export
+interface FromCode a where
+  fromCode : Int -> a
+
+public export
 data CurlCode
   = CURLE_OK                      {- 0 -}
   | CURLE_UNSUPPORTED_PROTOCOL    {- 1 -}
@@ -139,9 +147,6 @@ data CurlCode
   | CURLE_HTTP3                   {- 95 - An HTTP/3 layer problem -}
   | CURL_LAST {- never use! -}
 
-Show CurlCode where
-  show = showEnum -- No reason to write it ourselves
-
 public export
 data GlobalFlag : Type where
   CURL_GLOBAL_SSL : GlobalFlag -- (1<<0) /* no purpose since since 7.57.0 */
@@ -150,14 +155,6 @@ data GlobalFlag : Type where
   CURL_GLOBAL_NOTHING : GlobalFlag -- 0
   CURL_GLOBAL_DEFAULT : GlobalFlag -- CURL_GLOBAL_ALL
   CURL_GLOBAL_ACK_EINTR : GlobalFlag -- (1<<2)
-
-public export
-interface ToCode a where
-  toCode : a -> Int
-
-public export
-interface FromCode a where
-  fromCode : Int -> a
 
 export
 ToCode GlobalFlag where
@@ -178,8 +175,20 @@ ToCode GlobalFlag where
 --   fromCode x = lie_idris_crash $ "Global flag was not a valid flag: " ++ show x
 
 export
+Show CurlCode where
+  show = showEnum
+
+export
+Eq CurlCode where
+  (==) = eqEnum
+
+export
+Ord CurlCode where
+  compare = compareEnum
+
+export
 ToCode CurlCode where
-  toCode = enumTo [0..96] -- No reason to write it ourselves
+  toCode = enumTo [0..96]
 
 export
 FromCode CurlCode where
