@@ -41,6 +41,7 @@ unless b act = if b then pure () else act
 -- Intended use is to crash in places that crashing is correct to do because the
 -- failure isn't recoverable anyway
 export
-total
+total -- the lie
 %foreign "scheme:lambda (x) (blodwen-error-quit x)"
+         -- "javascript:lambda:(x)=>{throw new IdrisError(x)}"
 lie_idris_crash : String -> a

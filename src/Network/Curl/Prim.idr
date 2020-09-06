@@ -1,16 +1,18 @@
 module Network.Curl.Prim
 
--- import Data.Bytes.Lazy
-
-import Control.App
 import Network.Curl.Types
 
--- import Data.Bytes.Strict
--- import Data.Word.Word8
+import public Network.Curl.Prim.Easy
+import public Network.Curl.Prim.Global
+import public Network.Curl.Prim.Mime
+import public Network.Curl.Prim.Multi
+import public Network.Curl.Prim.Other
 
 import Data.IORef
 
 import Data.List as List
+
+import Derive.Prim
 
 import Util
 
@@ -27,65 +29,6 @@ data CurlHandle : HandleType -> Type where
 
 data OptTag = LongTag | FunPtrTag | ObjPtrTag | OffTTag
 
--------------------------------------------------
--- Easy
--------------------------------------------------
-
--- curl_easy_cleanup
--- curl_easy_duphandle
--- curl_easy_escape
--- curl_easy_getinfo
--- curl_easy_init
--- curl_easy_option_by_id
--- curl_easy_option_by_name
--- curl_easy_option_next
--- curl_easy_pause
--- curl_easy_perform
--- curl_easy_recv
--- curl_easy_reset
--- curl_easy_send
--- curl_easy_setopt
--- curl_easy_strerror
--- curl_easy_unescape
--- curl_easy_upkeep
-
--------------------------------------------------
--- Multi
--------------------------------------------------
-
-
-
-
-
--- paramTy : OptType -> Type
--- paramTy LongTag = Int
--- paramTy FunPtrTag = Ptr FunPtr
--- paramTy ObjPtrTag = Ptr ObjPtr
--- paramTy OffTTag = AnyPtr
-
--- data CurlOption : OptTag -> Type where
-  -- Opt1 : Int -> CurlOption LongTag
-  -- Opt2 : Int -> CurlOption FunPtrTag
-
-data Fraf : Type where [external]
-
-%foreign "C:curl_global_init,libcurl,curl/curl.h"
-prim_curl_global_init : Int -> PrimIO Int
-
-||| We use CURL_GLOBAL_ALL since that's the only useful flag in this libcurl version
-||| CURL_GLOBAL_ALL = 3 on my system
-export
-curl_global_init : HasIO io => io CurlCode
-curl_global_init = fromCode <$> primIO (prim_curl_global_init 3)
-
-%foreign "C:curl_global_init,libcurl,curl/curl.h"
-prim_curl_global_cleanup : PrimIO ()
-
-export
-curl_global_cleanup : HasIO io => io ()
-curl_global_cleanup = primIO prim_curl_global_cleanup
-
-
 
 %foreign "C:curl_easy_init,libcurl,curl/curl.h"
 prim_curl_easy_init : PrimIO (Ptr HandlePtr)
@@ -96,12 +39,16 @@ curl_easy_init = do r <- primIO prim_curl_easy_init
                     pure $ if believe_me r == 0 then Nothing
                                                 else Just (MkH r)
 
-%foreign "C:curl_easy_init,libcurl,curl/curl.h"
-prim_curl_easy_cleanup : Ptr HandlePtr -> PrimIO ()
+%runElab makeHasIO "curl_easy_cleanup" Export
+           ["C:curl_global_init,libcurl,curl/curl.h"]
+          `[ prim_curl_easy_cleanup : Ptr HandlePtr -> PrimIO () ] --`
 
-export
-curl_easy_cleanup : HasIO io => CurlHandle Easy -> io ()
-curl_easy_cleanup (MkH ptr) = primIO (prim_curl_easy_cleanup ptr)
+-- %foreign "C:curl_easy_cleanup,libcurl,curl/curl.h"
+-- prim_curl_easy_cleanup : Ptr HandlePtr -> PrimIO ()
+-- 
+-- export
+-- curl_easy_cleanup : HasIO io => CurlHandle Easy -> io ()
+-- curl_easy_cleanup (MkH ptr) = primIO (prim_curl_easy_cleanup ptr)
 
 -- It's just a lookup, expect this to work unless curl itself is broken
 %foreign "C:curl_easy_strerror,libcurl,curl/curl.h"

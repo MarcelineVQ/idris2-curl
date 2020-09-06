@@ -18,7 +18,6 @@ entire operation and won't return until it is done or failed.
 After the performance is made, you may get information about the transfer and
 then you cleanup the easy-session's handle and libcurl is entirely off the hook!
 
-
 -}
 
 -- withEasy = init *> do <* cleanup

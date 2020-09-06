@@ -1,7 +1,6 @@
-module EnumDerive
+module Derive.Enum
 
 import public Language.Reflection
-
 %language ElabReflection
 
 -- Tooling for basic interfaces of Enumeration types, e.g. data Foo = Biz | Baz
@@ -11,8 +10,7 @@ import public Language.Reflection
 
 -- nat casting is slow
 intLength : List a -> Int
-intLength [] = 0
-intLength (_ :: xs) = 1 + intLength xs
+intLength = foldl (\xs,_ => 1 + xs) 0
 
 guard : Bool -> String -> Elab ()
 guard p s = if p then pure () else fail s
@@ -97,21 +95,40 @@ compareEnum = do
 
 ||| Assigns an Int value to each constructor.
 ||| Provide a more custom list to skip some elements. e.g.
-||| enumToInt ([0..12] ++ [14..30]) would skip assigning 13
+||| enumTo ([0..12] ++ [14..30]) would skip assigning 13
 export
 %macro
 enumTo : List Int -> Elab (x -> Int)
 enumTo xs = do
-    Just (IPi _ _ _ _ tyimp@(IVar _ ty) `(Int)) <- goal
+    Just (IPi _ _ _ _ (IVar _ ty) `(Int)) <- goal
       | _ => fail "Required type is not: x -> Int"
     cns <- conNames ty
-    False <- pure $ length xs < length cns
-      | True => fail "Provided list is too short to cover all constructors."
-    clauses <- traverse clause (zip xs cns)
-    check `(\lam => ~(ICase eFC `(lam) tyimp clauses))
+    case compare (length xs) (length cns) of
+      LT => fail "Provided list is too short to exactly cover all constructors."
+      GT => fail "Provided list is too long to exactly cover all constructors."
+      EQ => do clauses <- traverse clause (zip xs cns)
+               check `(\lam => ~(ICase eFC `(lam) `(_) clauses))
   where
     clause : (a, Name) -> Elab Clause
     clause (i,n) = pure $ PatClause eFC (IVar eFC n) !(quote i)
+
+||| Assigns a constructor to each given Int and a catchall otherwise.
+||| You should probably not use this right now, this is subject to change as I
+||| figure out how to generalize from Int
+export
+%macro
+enumFrom : List Int -> x -> Elab (Int -> x)
+enumFrom xs catchall = do
+    Just (IPi _ _ _ _ `(Int) (IVar _ ty)) <- goal
+      | _ => fail "Required type is not: Int -> x"
+    cns <- conNames ty
+    clauses <- traverse clause (zip xs cns)
+    let catchall_clause =  [PatClause eFC `(_) !(quote catchall)]
+    check `(\lam => ~(ICase eFC `(lam) `(_) (clauses ++ catchall_clause)))
+  where
+    clause : (a, Name) -> Elab Clause
+    clause (i,n) = pure $ PatClause eFC !(quote i) (IVar eFC n)
+
 
 -------------------------------------------------
 -- Examples
@@ -126,7 +143,7 @@ interface ToCode' a where
 
 private
 interface FromCode' a where
-  fromCode : Int -> Maybe a
+  fromCode : Int -> a
 
 private
 Show Foo where
@@ -144,6 +161,10 @@ private
 ToCode' Foo where
   toCode = enumTo [0,1]
 
+private
+FromCode' Foo where
+  fromCode = enumFrom [0] Baz
+
 eqTest1 : Baz == Baz = True
 eqTest1 = Refl
 
@@ -152,6 +173,12 @@ eqTest2 = Refl
 
 enumToTest1 : toCode Baz == 1 = True
 enumToTest1 = Refl
+
+enumFromTest1 : fromCode 0 == Biz = True
+enumFromTest1 = Refl
+
+enumFromTest2 : fromCode (-12345) == Baz = True
+enumFromTest2 = Refl
 
 showTest1 : show Baz == "Baz" = True
 showTest1 = Refl

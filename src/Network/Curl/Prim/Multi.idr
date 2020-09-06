@@ -1,0 +1,21 @@
+module Network.Curl.Prim.Multi
+
+-------------------------------------------------
+-- Multi
+-------------------------------------------------
+-- curl_multi_add_handle
+-- curl_multi_assign
+-- curl_multi_cleanup
+-- curl_multi_fdset
+-- curl_multi_info_read
+-- curl_multi_init
+-- curl_multi_perform
+-- curl_multi_remove_handle
+-- curl_multi_setopt
+-- curl_multi_socket_action
+-- curl_multi_strerror
+-- curl_multi_timeout
+-- curl_multi_poll
+-- curl_multi_wait
+-- curl_multi_wakeup
+-------------------------------------------------

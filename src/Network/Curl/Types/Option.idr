@@ -1,5 +1,6 @@
 module Network.Curl.Types.Option
 
+import Network.Curl.Types.Code
 import Network.Curl.Types.CurlCode
 
 public export

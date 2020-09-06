@@ -1,17 +1,11 @@
 module Network.Curl.Types.CurlCode
 
+import  Network.Curl.Types.Code
+
 import Util
 
-import EnumDerive
+import Derive.Enum
 %language ElabReflection
-
-public export
-interface ToCode a where
-  toCode : a -> Int
-
-public export
-interface FromCode a where
-  fromCode : Int -> a
 
 public export
 data CurlCode
@@ -191,103 +185,105 @@ ToCode CurlCode where
   toCode = enumTo [0..96]
 
 export
-FromCode CurlCode where
-  fromCode 0 = CURLE_OK
-  fromCode 1 = CURLE_UNSUPPORTED_PROTOCOL
-  fromCode 2 = CURLE_FAILED_INIT
-  fromCode 3 = CURLE_URL_MALFORMAT
-  fromCode 4 = CURLE_NOT_BUILT_IN
-  fromCode 5 = CURLE_COULDNT_RESOLVE_PROXY
-  fromCode 6 = CURLE_COULDNT_RESOLVE_HOST
-  fromCode 7 = CURLE_COULDNT_CONNECT
-  fromCode 8 = CURLE_WEIRD_SERVER_REPLY
-  fromCode 9 = CURLE_REMOTE_ACCESS_DENIED
-  fromCode 10 = CURLE_FTP_ACCEPT_FAILED
-  fromCode 11 = CURLE_FTP_WEIRD_PASS_REPLY
-  fromCode 12 = CURLE_FTP_ACCEPT_TIMEOUT
-  fromCode 13 = CURLE_FTP_WEIRD_PASV_REPLY
-  fromCode 14 = CURLE_FTP_WEIRD_227_FORMAT
-  fromCode 15 = CURLE_FTP_CANT_GET_HOST
-  fromCode 16 = CURLE_HTTP2
-  fromCode 17 = CURLE_FTP_COULDNT_SET_TYPE
-  fromCode 18 = CURLE_PARTIAL_FILE
-  fromCode 19 = CURLE_FTP_COULDNT_RETR_FILE
-  fromCode 20 = CURLE_OBSOLETE20
-  fromCode 21 = CURLE_QUOTE_ERROR
-  fromCode 22 = CURLE_HTTP_RETURNED_ERROR
-  fromCode 23 = CURLE_WRITE_ERROR
-  fromCode 24 = CURLE_OBSOLETE24
-  fromCode 25 = CURLE_UPLOAD_FAILED
-  fromCode 26 = CURLE_READ_ERROR
-  fromCode 27 = CURLE_OUT_OF_MEMORY
-  fromCode 28 = CURLE_OPERATION_TIMEDOUT
-  fromCode 29 = CURLE_OBSOLETE29
-  fromCode 30 = CURLE_FTP_PORT_FAILED
-  fromCode 31 = CURLE_FTP_COULDNT_USE_REST
-  fromCode 32 = CURLE_OBSOLETE32
-  fromCode 33 = CURLE_RANGE_ERROR
-  fromCode 34 = CURLE_HTTP_POST_ERROR
-  fromCode 35 = CURLE_SSL_CONNECT_ERROR
-  fromCode 36 = CURLE_BAD_DOWNLOAD_RESUME
-  fromCode 37 = CURLE_FILE_COULDNT_READ_FILE
-  fromCode 38 = CURLE_LDAP_CANNOT_BIND
-  fromCode 39 = CURLE_LDAP_SEARCH_FAILED
-  fromCode 40 = CURLE_OBSOLETE40
-  fromCode 41 = CURLE_FUNCTION_NOT_FOUND
-  fromCode 42 = CURLE_ABORTED_BY_CALLBACK
-  fromCode 43 = CURLE_BAD_FUNCTION_ARGUMENT
-  fromCode 44 = CURLE_OBSOLETE44
-  fromCode 45 = CURLE_INTERFACE_FAILED
-  fromCode 46 = CURLE_OBSOLETE46
-  fromCode 47 = CURLE_TOO_MANY_REDIRECTS
-  fromCode 48 = CURLE_UNKNOWN_OPTION
-  fromCode 49 = CURLE_TELNET_OPTION_SYNTAX
-  fromCode 50 = CURLE_OBSOLETE50
-  fromCode 51 = CURLE_OBSOLETE51
-  fromCode 52 = CURLE_GOT_NOTHING
-  fromCode 53 = CURLE_SSL_ENGINE_NOTFOUND
-  fromCode 54 = CURLE_SSL_ENGINE_SETFAILED
-  fromCode 55 = CURLE_SEND_ERROR
-  fromCode 56 = CURLE_RECV_ERROR
-  fromCode 57 = CURLE_OBSOLETE57
-  fromCode 58 = CURLE_SSL_CERTPROBLEM
-  fromCode 59 = CURLE_SSL_CIPHER
-  fromCode 60 = CURLE_PEER_FAILED_VERIFICATION
-  fromCode 61 = CURLE_BAD_CONTENT_ENCODING
-  fromCode 62 = CURLE_LDAP_INVALID_URL
-  fromCode 63 = CURLE_FILESIZE_EXCEEDED
-  fromCode 64 = CURLE_USE_SSL_FAILED
-  fromCode 65 = CURLE_SEND_FAIL_REWIND
-  fromCode 66 = CURLE_SSL_ENGINE_INITFAILED
-  fromCode 67 = CURLE_LOGIN_DENIED
-  fromCode 68 = CURLE_TFTP_NOTFOUND
-  fromCode 69 = CURLE_TFTP_PERM
-  fromCode 70 = CURLE_REMOTE_DISK_FULL
-  fromCode 71 = CURLE_TFTP_ILLEGAL
-  fromCode 72 = CURLE_TFTP_UNKNOWNID
-  fromCode 73 = CURLE_REMOTE_FILE_EXISTS
-  fromCode 74 = CURLE_TFTP_NOSUCHUSER
-  fromCode 75 = CURLE_CONV_FAILED
-  fromCode 76 = CURLE_CONV_REQD
-  fromCode 77 = CURLE_SSL_CACERT_BADFILE
-  fromCode 78 = CURLE_REMOTE_FILE_NOT_FOUND
-  fromCode 79 = CURLE_SSH
-  fromCode 80 = CURLE_SSL_SHUTDOWN_FAILED
-  fromCode 81 = CURLE_AGAIN
-  fromCode 82 = CURLE_SSL_CRL_BADFILE
-  fromCode 83 = CURLE_SSL_ISSUER_ERROR
-  fromCode 84 = CURLE_FTP_PRET_FAILED
-  fromCode 85 = CURLE_RTSP_CSEQ_ERROR
-  fromCode 86 = CURLE_RTSP_SESSION_ERROR
-  fromCode 87 = CURLE_FTP_BAD_FILE_LIST
-  fromCode 88 = CURLE_CHUNK_FAILED
-  fromCode 89 = CURLE_NO_CONNECTION_AVAILABLE
-  fromCode 90 = CURLE_SSL_PINNEDPUBKEYNOTMATCH
-  fromCode 91 = CURLE_SSL_INVALIDCERTSTATUS
-  fromCode 92 = CURLE_HTTP2_STREAM
-  fromCode 93 = CURLE_RECURSIVE_API_CALL
-  fromCode 94 = CURLE_AUTH_ERROR
-  fromCode 95 = CURLE_HTTP3
-  fromCode 96 = CURL_LAST
-  fromCode x = lie_idris_crash $ "CURLcode was not a valid code: " ++ show x
+FromCode CurlCode where -- bad, FromCode should really be Maybe Int
+  fromCode = enumFrom [0..96] $ lie_idris_crash "CURLcode was not a valid code."
+
+  -- fromCode 0 = CURLE_OK
+  -- fromCode 1 = CURLE_UNSUPPORTED_PROTOCOL
+  -- fromCode 2 = CURLE_FAILED_INIT
+  -- fromCode 3 = CURLE_URL_MALFORMAT
+  -- fromCode 4 = CURLE_NOT_BUILT_IN
+  -- fromCode 5 = CURLE_COULDNT_RESOLVE_PROXY
+  -- fromCode 6 = CURLE_COULDNT_RESOLVE_HOST
+  -- fromCode 7 = CURLE_COULDNT_CONNECT
+  -- fromCode 8 = CURLE_WEIRD_SERVER_REPLY
+  -- fromCode 9 = CURLE_REMOTE_ACCESS_DENIED
+  -- fromCode 10 = CURLE_FTP_ACCEPT_FAILED
+  -- fromCode 11 = CURLE_FTP_WEIRD_PASS_REPLY
+  -- fromCode 12 = CURLE_FTP_ACCEPT_TIMEOUT
+  -- fromCode 13 = CURLE_FTP_WEIRD_PASV_REPLY
+  -- fromCode 14 = CURLE_FTP_WEIRD_227_FORMAT
+  -- fromCode 15 = CURLE_FTP_CANT_GET_HOST
+  -- fromCode 16 = CURLE_HTTP2
+  -- fromCode 17 = CURLE_FTP_COULDNT_SET_TYPE
+  -- fromCode 18 = CURLE_PARTIAL_FILE
+  -- fromCode 19 = CURLE_FTP_COULDNT_RETR_FILE
+  -- fromCode 20 = CURLE_OBSOLETE20
+  -- fromCode 21 = CURLE_QUOTE_ERROR
+  -- fromCode 22 = CURLE_HTTP_RETURNED_ERROR
+  -- fromCode 23 = CURLE_WRITE_ERROR
+  -- fromCode 24 = CURLE_OBSOLETE24
+  -- fromCode 25 = CURLE_UPLOAD_FAILED
+  -- fromCode 26 = CURLE_READ_ERROR
+  -- fromCode 27 = CURLE_OUT_OF_MEMORY
+  -- fromCode 28 = CURLE_OPERATION_TIMEDOUT
+  -- fromCode 29 = CURLE_OBSOLETE29
+  -- fromCode 30 = CURLE_FTP_PORT_FAILED
+  -- fromCode 31 = CURLE_FTP_COULDNT_USE_REST
+  -- fromCode 32 = CURLE_OBSOLETE32
+  -- fromCode 33 = CURLE_RANGE_ERROR
+  -- fromCode 34 = CURLE_HTTP_POST_ERROR
+  -- fromCode 35 = CURLE_SSL_CONNECT_ERROR
+  -- fromCode 36 = CURLE_BAD_DOWNLOAD_RESUME
+  -- fromCode 37 = CURLE_FILE_COULDNT_READ_FILE
+  -- fromCode 38 = CURLE_LDAP_CANNOT_BIND
+  -- fromCode 39 = CURLE_LDAP_SEARCH_FAILED
+  -- fromCode 40 = CURLE_OBSOLETE40
+  -- fromCode 41 = CURLE_FUNCTION_NOT_FOUND
+  -- fromCode 42 = CURLE_ABORTED_BY_CALLBACK
+  -- fromCode 43 = CURLE_BAD_FUNCTION_ARGUMENT
+  -- fromCode 44 = CURLE_OBSOLETE44
+  -- fromCode 45 = CURLE_INTERFACE_FAILED
+  -- fromCode 46 = CURLE_OBSOLETE46
+  -- fromCode 47 = CURLE_TOO_MANY_REDIRECTS
+  -- fromCode 48 = CURLE_UNKNOWN_OPTION
+  -- fromCode 49 = CURLE_TELNET_OPTION_SYNTAX
+  -- fromCode 50 = CURLE_OBSOLETE50
+  -- fromCode 51 = CURLE_OBSOLETE51
+  -- fromCode 52 = CURLE_GOT_NOTHING
+  -- fromCode 53 = CURLE_SSL_ENGINE_NOTFOUND
+  -- fromCode 54 = CURLE_SSL_ENGINE_SETFAILED
+  -- fromCode 55 = CURLE_SEND_ERROR
+  -- fromCode 56 = CURLE_RECV_ERROR
+  -- fromCode 57 = CURLE_OBSOLETE57
+  -- fromCode 58 = CURLE_SSL_CERTPROBLEM
+  -- fromCode 59 = CURLE_SSL_CIPHER
+  -- fromCode 60 = CURLE_PEER_FAILED_VERIFICATION
+  -- fromCode 61 = CURLE_BAD_CONTENT_ENCODING
+  -- fromCode 62 = CURLE_LDAP_INVALID_URL
+  -- fromCode 63 = CURLE_FILESIZE_EXCEEDED
+  -- fromCode 64 = CURLE_USE_SSL_FAILED
+  -- fromCode 65 = CURLE_SEND_FAIL_REWIND
+  -- fromCode 66 = CURLE_SSL_ENGINE_INITFAILED
+  -- fromCode 67 = CURLE_LOGIN_DENIED
+  -- fromCode 68 = CURLE_TFTP_NOTFOUND
+  -- fromCode 69 = CURLE_TFTP_PERM
+  -- fromCode 70 = CURLE_REMOTE_DISK_FULL
+  -- fromCode 71 = CURLE_TFTP_ILLEGAL
+  -- fromCode 72 = CURLE_TFTP_UNKNOWNID
+  -- fromCode 73 = CURLE_REMOTE_FILE_EXISTS
+  -- fromCode 74 = CURLE_TFTP_NOSUCHUSER
+  -- fromCode 75 = CURLE_CONV_FAILED
+  -- fromCode 76 = CURLE_CONV_REQD
+  -- fromCode 77 = CURLE_SSL_CACERT_BADFILE
+  -- fromCode 78 = CURLE_REMOTE_FILE_NOT_FOUND
+  -- fromCode 79 = CURLE_SSH
+  -- fromCode 80 = CURLE_SSL_SHUTDOWN_FAILED
+  -- fromCode 81 = CURLE_AGAIN
+  -- fromCode 82 = CURLE_SSL_CRL_BADFILE
+  -- fromCode 83 = CURLE_SSL_ISSUER_ERROR
+  -- fromCode 84 = CURLE_FTP_PRET_FAILED
+  -- fromCode 85 = CURLE_RTSP_CSEQ_ERROR
+  -- fromCode 86 = CURLE_RTSP_SESSION_ERROR
+  -- fromCode 87 = CURLE_FTP_BAD_FILE_LIST
+  -- fromCode 88 = CURLE_CHUNK_FAILED
+  -- fromCode 89 = CURLE_NO_CONNECTION_AVAILABLE
+  -- fromCode 90 = CURLE_SSL_PINNEDPUBKEYNOTMATCH
+  -- fromCode 91 = CURLE_SSL_INVALIDCERTSTATUS
+  -- fromCode 92 = CURLE_HTTP2_STREAM
+  -- fromCode 93 = CURLE_RECURSIVE_API_CALL
+  -- fromCode 94 = CURLE_AUTH_ERROR
+  -- fromCode 95 = CURLE_HTTP3
+  -- fromCode 96 = CURL_LAST
+  -- fromCode x = lie_idris_crash $ "CURLcode was not a valid code: " ++ show x
   

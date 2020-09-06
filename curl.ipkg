@@ -1,7 +1,7 @@
 package curl
 
 authors    = "MarcelineVQ"
-version    = "0.7.2.0"
+version    = "0.8.2.0"
 readme     = "README.md"
 
 homepage   = "https://github.com/MarcelineVQ/idris2-curl"
@@ -11,18 +11,27 @@ bugtracker = "https://github.com/MarcelineVQ/idris2-curl/issues"
 license    = "CC0 (refer to LICENSE file)"
 brief      = "Curl bindings developed for libcurl 7.68.0"
 
-modules = Network.Curl.Easy
-        , Network.Curl.Multi
-        , Network.Curl.Prim
-        , Network.Curl.Types
-        , Network.Curl.Types.CurlCode
-        , Network.Curl.Types.Option
-        
-        , EnumDerive
-        , Util
+modules =
+ -- Public
+    Network.Curl.Easy
+  , Network.Curl.Multi
+  , Network.Curl.Types
+ -- Private
+  , Network.Curl.Types.Code
+  , Network.Curl.Types.CurlCode
+  , Network.Curl.Types.Option
+
+  , Network.Curl.Prim
+  , Network.Curl.Prim.Easy
+  , Network.Curl.Prim.Multi
+  , Network.Curl.Prim.Mime
+  
+  , Derive.Enum
+  , Derive.Prim
+  , Util
 
 sourcedir = "src"
 
-main = Network.Curl.Prim
+-- main = Network.Curl.Prim
 
 depends = base, contrib, network, managed
