@@ -17,6 +17,13 @@ intLength = foldl (\xs,_ => 1 + xs) 0
 guard : Bool -> String -> Elab ()
 guard p s = if p then pure () else fail s
 
+checkList : List a -> List b -> Elab ()
+checkList xs ys =
+  case compare (length xs) (length ys) of
+    LT => fail "Provided list is too short to exactly cover all constructors."
+    GT => fail "Provided list is too long to exactly cover all constructors."
+    EQ => pure ()
+
 nameStr : Name -> String
 nameStr (UN x) = x
 nameStr (MN x y) = x
@@ -95,7 +102,7 @@ compareEnum = do
     clause : (Int, Name) -> Elab Clause
     clause (i,n) = pure $ PatClause eFC (IVar eFC n) !(quote i)
 
-||| Assigns an Int value to each constructor.
+||| Maps an Int value to each constructor.
 ||| Provide a more custom list to skip some elements. e.g.
 ||| enumTo ([0..12] ++ [14..30]) would skip assigning 13
 export
@@ -104,45 +111,46 @@ enumTo : List Int -> Elab (x -> Int)
 enumTo xs = do
     Just (IPi _ _ _ _ (IVar _ ty) `(Int)) <- goal
       | _ => fail "Required type is not: x -> Int"
-    cns <- conNames ty
-    case compare (length xs) (length cns) of
-      LT => fail "Provided list is too short to exactly cover all constructors."
-      GT => fail "Provided list is too long to exactly cover all constructors."
-      EQ => do clauses <- traverse clause (zip xs cns)
-               check `(\lam => ~(ICase eFC `(lam) `(_) clauses))
+    cons <- conNames ty
+    checkList xs cons
+    clauses <- traverse clause (zip xs cons)
+    check `(\lam => ~(ICase eFC `(lam) `(_) clauses))
   where
     clause : (a, Name) -> Elab Clause
     clause (i,n) = pure $ PatClause eFC (IVar eFC n) !(quote i)
 
-||| Assigns a constructor to each given Int and a catchall otherwise.
-||| You should probably not use this right now, this is subject to change as I
-||| figure out how to generalize from Int
-export
-%macro
-unsafeEnumFrom : List Int -> Elab (Int -> x)
-unsafeEnumFrom xs = do
-    Just (IPi _ _ _ _ `(Int) (IVar _ ty)) <- goal
-      | _ => fail "Required type is not: Int -> x"
-    cns <- conNames ty
-    clauses <- traverse clause (zip xs cns)
-    check `(\lam => assert_total $ ~(ICase eFC `(lam) `(_) clauses))
-  where
-    clause : (a, Name) -> Elab Clause
-    clause (i,n) = pure $ PatClause eFC !(quote i) (IVar eFC n)
-
+||| Maps x's constructors to given List of Ints, resulting function yields
+||| Nothing if given an Int that is not mapped.
 export
 %macro
 enumFrom : List Int -> Elab (Int -> Maybe x)
 enumFrom xs = do
     Just (IPi _ _ _ _ `(Int) `(Prelude.Types.Maybe ~(IVar _ ty))) <- goal
       | _ => fail "Required type is not: Int -> Maybe x"
-    cns <- conNames ty
-    clauses <- traverse clause (zip xs cns)
+    cons <- conNames ty
+    checkList xs cons
+    clauses <- traverse clause (zip xs cons)
     let catchall_clause =  [PatClause eFC `(_) `(Nothing)]
     check `(\lam => ~(ICase eFC `(lam) `(_) (clauses ++ catchall_clause)))
   where
     clause : (a, Name) -> Elab Clause
     clause (i,n) = pure $ PatClause eFC !(quote i) `(Just ~(IVar eFC n))
+
+||| Maps x's constructors to given List of Ints, resulting function's behavior
+||| is undefined if given an Int that is not mapped.
+export
+%macro
+unsafeEnumFrom : List Int -> Elab (Int -> x)
+unsafeEnumFrom xs = do
+    Just (IPi _ _ _ _ `(Int) (IVar _ ty)) <- goal
+      | _ => fail "Required type is not: Int -> x"
+    cons <- conNames ty
+    checkList xs cons
+    clauses <- traverse clause (zip xs cons)
+    check `(\lam => assert_total $ ~(ICase eFC `(lam) `(_) clauses))
+  where
+    clause : (a, Name) -> Elab Clause
+    clause (i,n) = pure $ PatClause eFC !(quote i) (IVar eFC n)
 
 -------------------------------------------------
 -- Examples
