@@ -3,6 +3,11 @@ module Network.Curl.Types.Option
 import Network.Curl.Types.Code
 import Network.Curl.Types.CurlCode
 
+import Derive.Enum
+%language ElabReflection
+
+data OptTag = LongTag | FunPtrTag | ObjPtrTag | OffTTag
+
 public export
 data OptType
   = CURLOPTTYPE_LONG -- int32
@@ -21,15 +26,6 @@ ToCode OptType where
 
   toCode CURLOPTTYPE_STRINGPOINT = 10000
   toCode CURLOPTTYPE_SLISTPOINT =  10000
-
-public export
-paramTy : OptType -> Type
-paramTy CURLOPTTYPE_LONG = Int
-paramTy CURLOPTTYPE_FUNCTIONPOINT = String -> Int -> Int -> AnyPtr -> IO Int
-paramTy CURLOPTTYPE_OBJECTPOINT = AnyPtr
-paramTy CURLOPTTYPE_STRINGPOINT = String
-paramTy CURLOPTTYPE_SLISTPOINT = AnyPtr
-paramTy CURLOPTTYPE_OFF_T = Int
 
 public export
 data CurlOption : OptType -> Type where
@@ -1277,3 +1273,17 @@ export
   toCode CURLOPT_MAXAGE_CONN = 288 + toCode ty
   toCode CURLOPT_SASL_AUTHZID = 289 + toCode ty
   -- toCode CURLOPT_LASTENTRY = 290
+
+public export
+Show (CurlOption ty) where
+  show = showEnum
+
+
+public export
+paramTy : OptType -> Type
+paramTy CURLOPTTYPE_LONG = Int
+paramTy CURLOPTTYPE_FUNCTIONPOINT = String -> Int -> Int -> AnyPtr -> IO Int
+paramTy CURLOPTTYPE_OBJECTPOINT = AnyPtr
+paramTy CURLOPTTYPE_STRINGPOINT = String
+paramTy CURLOPTTYPE_SLISTPOINT = AnyPtr
+paramTy CURLOPTTYPE_OFF_T = Int

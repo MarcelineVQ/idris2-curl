@@ -6,11 +6,14 @@ module Network.Curl.Prim.Global
 -- curl_global_cleanup
 -- curl_global_init
 -- curl_global_init_mem -- not implemented
--- curl_global_sslset
+-- curl_global_sslset -- not implemented
 -------------------------------------------------
 
-import Network.Curl.Types.Code
 import Network.Curl.Types
+
+import System.FFI
+
+
 import Derive.Prim
 %language ElabReflection
 
