@@ -3,10 +3,14 @@ module Derive.Prim
 import public Language.Reflection
 %language ElabReflection
 
--- Derivations for common prim creation needs
--- Use of this module automatically imports Language.Reflection and requires
--- %language ElabReflection to be enabled below your imports.
+-- Derivations for common prim creation needs Use of this module automatically
+-- imports Language.Reflection and requires %language ElabReflection to be
+-- enabled below your imports.
 -- Examples at module bottom
+
+-------------------------------------------------
+-- Helpers, moving these to another module breaks Elaboration :S
+-------------------------------------------------
 
 eFC : FC
 eFC = EmptyFC
@@ -17,23 +21,28 @@ toIVar = IVar eFC
 toIBindVar : String -> TTImp
 toIBindVar = IBindVar eFC
 
+public export
 argCount : TTImp -> Nat
 argCount (IPi _ _ _ _ _ retty) = S (argCount retty)
 argCount retty = Z
 
--- makeHasIO "what" Private ["c:foo","javascript:borp"]
---                         `[ prim_gob : Int -> Int -> PrimIO Int ]
--- This generates:
--- %foreign "c:foo" "javascript:borp"
--- prim_gob : Int -> Int -> PrimIO Int
--- And:
--- private
--- what : HasIO io => Int -> Int -> io Int
--- what x y = primIO $ prim_gob x y
--- This is not as useful as is it looks since often you'll be wanting to supply
--- specific arguments to your `prim_gob` or pattern match on `what`'s arguments,
--- this doesn't do that and is a direct translation/application.
--- Still it can alleviate some of the write-twice burden PrimIO can introduce.
+-------------------------------------------------
+
+{-
+   makeHasIO "what" Private ["c:foo","javascript:borp"]
+                          `[ prim_gob : Int -> Int -> PrimIO Int ]
+   This generates:
+   %foreign "c:foo" "javascript:borp"
+   prim_gob : Int -> Int -> PrimIO Int
+   And:
+   private
+   what : HasIO io => Int -> Int -> io Int
+   what x y = primIO $ prim_gob x y
+   This is not as useful as is it looks since often you'll be wanting to supply
+   specific arguments to your `prim_gob` or pattern match on `what`'s arguments,
+   this doesn't do that and is a direct translation/application.
+   Still it can alleviate some of the write-twice burden PrimIO can introduce.
+-}
 export
 makeHasIO : String -> Visibility -> List String -> List Decl -> Elab ()
 makeHasIO funname0 vis str ys = do

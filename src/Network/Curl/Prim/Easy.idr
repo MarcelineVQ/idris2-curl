@@ -37,7 +37,7 @@ import Derive.Prim
 -- curl_easy_duphandle
 %runElab makeHasIO "curl_easy_duphandle" Export
            ["C:curl_easy_duphandle,libcurl,curl/curl.h"]
-          `[ prim_curl_easy_duphandle : Ptr HandlePtr -> PrimIO Ptr HandlePtr ] --`
+          `[ prim_curl_easy_duphandle : Ptr HandlePtr -> PrimIO (Ptr HandlePtr) ] --`
 
 
 %foreign "C:curl_easy_init,libcurl,curl/curl.h"

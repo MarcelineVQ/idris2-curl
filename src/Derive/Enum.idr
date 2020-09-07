@@ -1,8 +1,6 @@
 module Derive.Enum
 
-import Data.Nat
-
-import Util
+import Data.Nat -- LTE example
 
 import public Language.Reflection
 %language ElabReflection
@@ -18,19 +16,15 @@ import public Language.Reflection
 -- the compile time, best to place your types you're deriving for into a module
 -- that doesn't change often.
 
+
+
+-------------------------------------------------
+-- Helpers, moving these to another module breaks Elaboration :S
+-------------------------------------------------
+
 -- nat casting is slow
 intLength : List a -> Int
 intLength = foldl (\xs,_ => 1 + xs) 0
-
-guard : Bool -> String -> Elab ()
-guard p s = if p then pure () else fail s
-
-checkList : List a -> List b -> Elab ()
-checkList xs ys =
-  case compare (length xs) (length ys) of
-    LT => fail "Provided list is too short to exactly cover all constructors."
-    GT => fail "Provided list is too long to exactly cover all constructors."
-    EQ => pure ()
 
 nameStr : Name -> String
 nameStr (UN x) = x
@@ -41,21 +35,31 @@ nameStr (DN x y) = x
 eFC : FC
 eFC = EmptyFC
 
+guard : Bool -> String -> Elab ()
+guard p s = if p then pure () else fail s
+
 lookupType : Name -> Elab (Name, TTImp)
 lookupType n = do
   [res@(qname,ttimp)] <- getType n
     | _ => fail $ show n ++ " is not unique in scope."
   pure res
 
-export
 constructors : Name -> Elab (List (Name, TTImp))
 constructors x = do
   cons <- getCons x
   for cons lookupType
  
-export
 conNames : Name -> Elab (List Name)
 conNames x = map fst <$> constructors x
+
+-------------------------------------------------
+
+checkList : List a -> List b -> Elab ()
+checkList xs ys =
+  case compare (length xs) (length ys) of
+    LT => fail "Provided list is too short to exactly cover all constructors."
+    GT => fail "Provided list is too long to exactly cover all constructors."
+    EQ => pure ()
 
 enumName : TTImp -> Maybe Name
 enumName (IVar _ n) = Just n
@@ -98,7 +102,8 @@ showEnum = do
     logTerm "fgsfds" 1 "goal" k
     Just (IPi _ _ _ _ ty `(String)) <- goal
       | _ => fail "Required type is not: x -> String"
-    n <- checkEnumType ty
+    n' <- checkEnumType ty
+    n <- inCurrentNS (UN (nameStr n'))
     cns <- conNames n
     -- cons <- constructors n
     -- traverse (logTerm "" 1 "blah") (map snd cons)
@@ -114,8 +119,10 @@ eqEnum : Elab (x -> x -> Bool)
 eqEnum = do
     Just (IPi _ _ _ _ ty1 (IPi _ _ _ _ ty2 `(Prelude.Basics.Bool))) <- goal
       | _ => fail "Required type is not: x -> x -> Bool"
-    n1 <- checkEnumType ty1
-    n2 <- checkEnumType ty2
+    n1' <- checkEnumType ty1
+    n2' <- checkEnumType ty2
+    n1 <- inCurrentNS (UN (nameStr n1'))
+    n2 <- inCurrentNS (UN (nameStr n2'))
     guard (nameStr n1 == nameStr n2) "Required type is not: x -> x -> Bool"
     conns <- conNames n1
     check `(\x,y => ~(casex conns `(x) `(y)))
@@ -141,8 +148,10 @@ compareEnum : Elab (x -> x -> Ordering)
 compareEnum = do
     Just (IPi _ _ _ _ ty1 (IPi _ _ _ _ ty2 `(Prelude.EqOrd.Ordering))) <- goal
       | _ => fail "Required type is not: x -> x -> Ordering"
-    n1 <- checkEnumType ty1
-    n2 <- checkEnumType ty2
+    n1' <- checkEnumType ty1
+    n2' <- checkEnumType ty2
+    n1 <- inCurrentNS (UN (nameStr n1'))
+    n2 <- inCurrentNS (UN (nameStr n2'))
     guard (nameStr n1 == nameStr n2) "Required type is not: x -> x -> Ordering"
     cns <- conNames n1
     clauses <- traverse clause (zip [0 .. intLength cns] cns)
@@ -161,7 +170,8 @@ enumTo : List Int -> Elab (x -> Int)
 enumTo xs = do
     Just (IPi _ _ _ _ ty `(Int)) <- goal
       | _ => fail "Required type is not: x -> Int"
-    n <- checkEnumType ty
+    n' <- checkEnumType ty
+    n <- inCurrentNS (UN (nameStr n'))
     cons <- conNames n
     checkList xs cons
     clauses <- traverse clause (zip xs cons)
@@ -178,7 +188,8 @@ enumFrom : List Int -> Elab (Int -> Maybe x)
 enumFrom xs = do
     Just (IPi _ _ _ _ `(Int) `(Prelude.Types.Maybe ~(ty))) <- goal
       | _ => fail "Required type is not: Int -> Maybe x"
-    n <- checkEnumType ty
+    n' <- checkEnumType ty
+    n <- inCurrentNS (UN (nameStr n'))
     cons <- conNames n
     checkList xs cons
     clauses <- traverse clause (zip xs cons)
@@ -196,7 +207,8 @@ unsafeEnumFrom : List Int -> Elab (Int -> x)
 unsafeEnumFrom xs = do
     Just (IPi _ _ _ _ `(Int) ty) <- goal
       | _ => fail "Required type is not: Int -> x"
-    n <- checkEnumType ty
+    n' <- checkEnumType ty
+    n <- inCurrentNS (UN (nameStr n'))
     cons <- conNames n
     checkList xs cons
     clauses <- traverse clause (zip xs cons)
