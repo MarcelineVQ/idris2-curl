@@ -10,7 +10,7 @@ data OptTag = LongTag | FunPtrTag | ObjPtrTag | OffTTag
 
 public export
 data OptType
-  = CURLOPTTYPE_LONG -- int32
+  = CURLOPTTYPE_LONG -- at east 32 bits
   | CURLOPTTYPE_FUNCTIONPOINT -- void*
   | CURLOPTTYPE_OBJECTPOINT
   | CURLOPTTYPE_STRINGPOINT -- char*

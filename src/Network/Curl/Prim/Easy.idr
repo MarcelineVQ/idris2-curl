@@ -22,6 +22,10 @@ module Network.Curl.Prim.Easy
 -- curl_easy_upkeep
 -------------------------------------------------
 
+import Data.Buffer
+
+import Network.Curl.Prim.Mem
+
 import Network.Curl.Types
 -- import Derive.Enum
 
@@ -33,11 +37,15 @@ import Derive.Prim
            ["C:curl_easy_cleanup,libcurl,curl/curl.h"]
           `[ prim_curl_easy_cleanup : Ptr HandlePtr -> PrimIO () ] --`
 
+-------------------------------------------------
+
 
 -- curl_easy_duphandle
 %runElab makeHasIO "curl_easy_duphandle" Export
            ["C:curl_easy_duphandle,libcurl,curl/curl.h"]
           `[ prim_curl_easy_duphandle : Ptr HandlePtr -> PrimIO (Ptr HandlePtr) ] --`
+
+-------------------------------------------------
 
 
 %foreign "C:curl_easy_init,libcurl,curl/curl.h"
@@ -48,6 +56,9 @@ curl_easy_init : HasIO io => io (Maybe (CurlHandle Easy))
 curl_easy_init = do r <- primIO prim_curl_easy_init
                     pure $ if believe_me r == 0 then Nothing
                                                 else Just (MkH r)
+
+-------------------------------------------------
+
 
 -- %foreign "C:curl_easy_cleanup,libcurl,curl/curl.h"
 -- prim_curl_easy_cleanup : Ptr HandlePtr -> PrimIO ()
@@ -63,6 +74,9 @@ curl_easy_strerror : (curlcode : Int) -> String
 export
 curlEasyStrError : CurlCode -> String
 curlEasyStrError c = curl_easy_strerror (toCode c)
+
+-------------------------------------------------
+
 
  -- -> IO LBytes
 
@@ -96,9 +110,60 @@ curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_OFF_T} v = ?dsf_6
 
   -- = fromCode <$> primIO (prim_curl_easy_setopt x (toCode y) (believe_me z))
 
+-------------------------------------------------
+
+
 %foreign "C:curl_easy_perform,libcurl,curl/curl.h"
 prim_curl_easy_perform : Ptr HandlePtr -> PrimIO Int
 
 export
 curl_easy_perform : HasIO io => CurlHandle Easy -> io CurlCode
 curl_easy_perform (MkH ptr) = unsafeFromCode <$> primIO (prim_curl_easy_perform ptr)
+
+-------------------------------------------------
+
+
+-- This String is allocated by curl but idris ffi should copy it so we should be
+-- safe in the presence or lack of curl_free
+-- TODO check this ^
+-- TODO check for possible issues with \0
+-- char *curl_easy_escape( CURL *curl, const char *string , int length );
+%foreign "C:curl_easy_escape,libcurl,curl/curl.h"
+prim_curl_easy_escape : Ptr HandlePtr -> (url : String)
+                     -> (url_len : Int) -> PrimIO String
+
+
+curl_easy_escape : HasIO io => CurlHandle ty -> String -> io String
+curl_easy_escape (MkH h) str = primIO $ prim_curl_easy_escape h str 0
+
+-------------------------------------------------
+
+-- This String is allocated by curl but idris ffi should copy it so we should be
+-- safe in the presence or lack of curl_free.
+-- TODO check this ^
+-- We use Ptr String because idris String is null terminated, and will chop our
+-- string if we're not careful
+-- we need to curl_free Ptr String when we're done
+-- char *curl_easy_unescape( CURL *curl, const char *url , int inlength, int *outlength );
+%foreign "C:curl_easy_unescape,libcurl,curl/curl.h"
+prim_curl_easy_unescape : Ptr HandlePtr -> (url : String) -> (url_len : Int)
+                       -> AnyPtr -> PrimIO (Ptr String)
+
+curl_easy_unescape : HasIO io => CurlHandle ty -> String -> io String
+curl_easy_unescape (MkH h) str = do
+  alloc 40 $ \ptr => do
+    src <- primIO $ prim_curl_easy_unescape h str 0 ptr
+    v <- foreign_ref_int ptr 0
+    printLn v
+    pure "dsffdaasdsa"
+
+testo : IO ()
+testo = do
+  Just h <- curl_easy_init
+    | _ => printLn "fuck"
+  l <- curl_easy_escape h "fafodob"
+  m <- curl_easy_unescape h l
+  n <- curl_easy_escape h m
+  printLn n
+-------------------------------------------------
+

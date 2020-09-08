@@ -29,6 +29,7 @@ modules =
   , Network.Curl.Prim
   , Network.Curl.Prim.Easy
   , Network.Curl.Prim.Global
+  , Network.Curl.Prim.Mem
   , Network.Curl.Prim.Multi
   , Network.Curl.Prim.Mime
   , Network.Curl.Prim.Other
