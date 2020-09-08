@@ -102,8 +102,7 @@ showEnum = do
     logTerm "fgsfds" 1 "goal" k
     Just (IPi _ _ _ _ ty `(String)) <- goal
       | _ => fail "Required type is not: x -> String"
-    n' <- checkEnumType ty
-    n <- inCurrentNS (UN (nameStr n'))
+    n <- checkEnumType ty
     cns <- conNames n
     -- cons <- constructors n
     -- traverse (logTerm "" 1 "blah") (map snd cons)
@@ -119,10 +118,8 @@ eqEnum : Elab (x -> x -> Bool)
 eqEnum = do
     Just (IPi _ _ _ _ ty1 (IPi _ _ _ _ ty2 `(Prelude.Basics.Bool))) <- goal
       | _ => fail "Required type is not: x -> x -> Bool"
-    n1' <- checkEnumType ty1
-    n2' <- checkEnumType ty2
-    n1 <- inCurrentNS (UN (nameStr n1'))
-    n2 <- inCurrentNS (UN (nameStr n2'))
+    n1 <- checkEnumType ty1
+    n2 <- checkEnumType ty2
     guard (nameStr n1 == nameStr n2) "Required type is not: x -> x -> Bool"
     conns <- conNames n1
     check `(\x,y => ~(casex conns `(x) `(y)))
@@ -148,10 +145,8 @@ compareEnum : Elab (x -> x -> Ordering)
 compareEnum = do
     Just (IPi _ _ _ _ ty1 (IPi _ _ _ _ ty2 `(Prelude.EqOrd.Ordering))) <- goal
       | _ => fail "Required type is not: x -> x -> Ordering"
-    n1' <- checkEnumType ty1
-    n2' <- checkEnumType ty2
-    n1 <- inCurrentNS (UN (nameStr n1'))
-    n2 <- inCurrentNS (UN (nameStr n2'))
+    n1 <- checkEnumType ty1
+    n2 <- checkEnumType ty2
     guard (nameStr n1 == nameStr n2) "Required type is not: x -> x -> Ordering"
     cns <- conNames n1
     clauses <- traverse clause (zip [0 .. intLength cns] cns)
@@ -170,8 +165,7 @@ enumTo : List Int -> Elab (x -> Int)
 enumTo xs = do
     Just (IPi _ _ _ _ ty `(Int)) <- goal
       | _ => fail "Required type is not: x -> Int"
-    n' <- checkEnumType ty
-    n <- inCurrentNS (UN (nameStr n'))
+    n <- checkEnumType ty
     cons <- conNames n
     checkList xs cons
     clauses <- traverse clause (zip xs cons)
@@ -188,8 +182,7 @@ enumFrom : List Int -> Elab (Int -> Maybe x)
 enumFrom xs = do
     Just (IPi _ _ _ _ `(Int) `(Prelude.Types.Maybe ~(ty))) <- goal
       | _ => fail "Required type is not: Int -> Maybe x"
-    n' <- checkEnumType ty
-    n <- inCurrentNS (UN (nameStr n'))
+    n <- checkEnumType ty
     cons <- conNames n
     checkList xs cons
     clauses <- traverse clause (zip xs cons)
@@ -207,8 +200,7 @@ unsafeEnumFrom : List Int -> Elab (Int -> x)
 unsafeEnumFrom xs = do
     Just (IPi _ _ _ _ `(Int) ty) <- goal
       | _ => fail "Required type is not: Int -> x"
-    n' <- checkEnumType ty
-    n <- inCurrentNS (UN (nameStr n'))
+    n <- checkEnumType ty
     cons <- conNames n
     checkList xs cons
     clauses <- traverse clause (zip xs cons)
