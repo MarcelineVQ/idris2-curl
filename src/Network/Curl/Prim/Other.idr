@@ -1,5 +1,8 @@
 module Network.Curl.Prim.Other
 
+import Derive.Prim
+%language ElabReflection
+
 -------------------------------------------------
 -- Other
 -------------------------------------------------
@@ -25,3 +28,7 @@ module Network.Curl.Prim.Other
 -- curl_version
 -- curl_version_info
 -------------------------------------------------
+
+%runElab makeHasIO "curl_free" Export
+           ["C:curl_free,libcurl,curl/curl.h"]
+          `[ prim_curl_free : Ptr Bits8 -> PrimIO () ] --`

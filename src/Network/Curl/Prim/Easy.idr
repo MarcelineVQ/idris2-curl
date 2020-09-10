@@ -25,6 +25,7 @@ module Network.Curl.Prim.Easy
 import Data.Buffer
 
 import Network.Curl.Prim.Mem
+import Network.Curl.Prim.Other
 
 import Network.Curl.Types
 -- import Derive.Enum
@@ -130,42 +131,54 @@ curl_easy_perform (MkH ptr) = unsafeFromCode <$> primIO (prim_curl_easy_perform 
 prim_curl_easy_escape : Ptr HandlePtr -> (url : String)
                      -> (url_len : Int) -> PrimIO String
 
-
+-- idris calls free after copying the PrimIO String it converts but curl wants you
+-- to call curl_free, how can I reconcile this?
+||| Escapes a String byte-by-byte without awareness of encoding.
+||| String is expected to be free of \0 since strlen() is used by curl and so
+||| will truncate on \0. This shouldn't be a problem in idris since the
+||| primitive String already truncate on \0 in idris.
 curl_easy_escape : HasIO io => CurlHandle ty -> String -> io String
 curl_easy_escape (MkH h) str = primIO $ prim_curl_easy_escape h str 0
+-- 0 is to tell curl to compute the length itself via strlen()
 
 -------------------------------------------------
 
 -- This String is allocated by curl but idris ffi should copy it so we should be
 -- safe in the presence or lack of curl_free.
 -- TODO check this ^
--- We use Ptr String because idris String is null terminated, and will chop our
--- string if we're not careful
--- we need to curl_free Ptr String when we're done
 -- char *curl_easy_unescape( CURL *curl, const char *url , int inlength, int *outlength );
 %foreign "C:curl_easy_unescape,libcurl,curl/curl.h"
 prim_curl_easy_unescape : Ptr HandlePtr -> (url : String) -> (url_len : Int)
-                       -> Buffer -> PrimIO (Ptr String)
+                       -> (intptr : Buffer) -> PrimIO String
 
-curl_easy_unescape : HasIO io => CurlHandle ty -> String -> io String
-curl_easy_unescape (MkH h) str = do
-  b <- newBuffer' 8 -- 64 bits for foreign ptr
-  strptr <- primIO $ prim_curl_easy_unescape h str 0 b
-  pure "not done"
-  -- if !(getInt32 b 0) /= 0
-  --   then
-  -- 
-  -- 
-  -- printLn r
-  -- pure r
+||| Unescapes a String byte-by-byte without awareness of encoding. When
+||| encountering %00 or some other source of \0 it returns as much of the String
+||| as it got to that point.
+
+||| NB I'm not bothering with proper handling %00, if you need this I'll accept
+||| a tested PR though. It's just that idris's \0 terminated Strings can make
+||| this a hassle. I'll revisit this when/if I made a Text type since it won't
+||| have a weakness to \0.
+curl_easy_unescape : HasIO io => CurlHandle ty -> String -> io (Either String String)
+curl_easy_unescape (MkH h) str
+  = withAllocElems {a=Int} 1 $ \iptr => do
+      str <- primIO $ prim_curl_easy_unescape h str 0 (unsafeForeignPtrToBuffer iptr)
+      len <- peek iptr
+      pure $ if len > 0 && cast (length str) /= len -- str contained %00
+        then Left str -- This is where a Text type could help.
+        else Right str
 
 testo : IO ()
 testo = do
   Just h <- curl_easy_init
     | _ => printLn "fuck"
   l <- curl_easy_escape h "fafodoba"
-  m <- curl_easy_unescape h l
+  Right m <- curl_easy_unescape h l
+    | Left s => printLn s -- print remainder if there is one
   n <- curl_easy_escape h m
   printLn n
--------------------------------------------------
+  Right m <- curl_easy_unescape h "gabbo%00nock"
+    | Left s => printLn s -- print remainder if there is one
+  printLn m
 
+-------------------------------------------------
