@@ -1,5 +1,7 @@
 module Util
 
+import Data.List
+
 infixl 1 <&>
 export
 (<&>) : Functor f => f a -> (a -> b) -> f b
@@ -36,6 +38,11 @@ isJust _ = False
 export
 unless : Applicative f => Bool -> Lazy (f ()) -> f ()
 unless b act = if b then pure () else act
+
+-- slow, preserves order
+export
+difference : Eq a => List a -> List a -> List a
+difference xs ys = foldr (\y,xs => delete y xs) xs ys
 
 -- TODO: bring this up with other devs for idris about it's merits and negatives
 -- Intended use is to crash in places that crashing is correct to do because the

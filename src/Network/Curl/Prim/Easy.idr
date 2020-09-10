@@ -100,13 +100,11 @@ export
 curl_easy_setopt : HasIO io => {ty : _} -> CurlHandle Easy -> CurlOption ty -> paramTy ty -> io CurlCode
 curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_LONG} v
   = unsafeFromCode <$> primIO (prim_curl_easy_setopt_long h (toCode op) v)
-curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_STRINGPOINT} v
-  = unsafeFromCode <$> primIO (prim_curl_easy_setopt_string h (toCode op) v)
 curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_FUNCTIONPOINT} v
   = map unsafeFromCode . primIO $ prim_curl_easy_setopt_fcallback h (toCode op) (\a,b,c,d => toPrim (v a b c d))
 curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_OBJECTPOINT} v = ?dsf_3
-curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_SLISTPOINT} v = ?dsf_5
 curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_OFF_T} v = ?dsf_6
+curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_BLOB} v = ?dsf_6s
 
   -- = fromCode <$> primIO (prim_curl_easy_setopt x (toCode y) (believe_me z))
 
@@ -147,21 +145,25 @@ curl_easy_escape (MkH h) str = primIO $ prim_curl_easy_escape h str 0
 -- char *curl_easy_unescape( CURL *curl, const char *url , int inlength, int *outlength );
 %foreign "C:curl_easy_unescape,libcurl,curl/curl.h"
 prim_curl_easy_unescape : Ptr HandlePtr -> (url : String) -> (url_len : Int)
-                       -> AnyPtr -> PrimIO (Ptr String)
+                       -> Buffer -> PrimIO (Ptr String)
 
 curl_easy_unescape : HasIO io => CurlHandle ty -> String -> io String
 curl_easy_unescape (MkH h) str = do
-  alloc 40 $ \ptr => do
-    src <- primIO $ prim_curl_easy_unescape h str 0 ptr
-    v <- foreign_ref_int ptr 0
-    printLn v
-    pure "dsffdaasdsa"
+  b <- newBuffer' 8 -- 64 bits for foreign ptr
+  strptr <- primIO $ prim_curl_easy_unescape h str 0 b
+  pure "not done"
+  -- if !(getInt32 b 0) /= 0
+  --   then
+  -- 
+  -- 
+  -- printLn r
+  -- pure r
 
 testo : IO ()
 testo = do
   Just h <- curl_easy_init
     | _ => printLn "fuck"
-  l <- curl_easy_escape h "fafodob"
+  l <- curl_easy_escape h "fafodoba"
   m <- curl_easy_unescape h l
   n <- curl_easy_escape h m
   printLn n

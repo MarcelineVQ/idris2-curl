@@ -56,9 +56,13 @@ conNames x = map fst <$> constructors x
 
 checkList : List a -> List b -> Elab ()
 checkList xs ys =
-  case compare (length xs) (length ys) of
-    LT => fail "Provided list is too short to exactly cover all constructors."
-    GT => fail "Provided list is too long to exactly cover all constructors."
+  let lenxs = length xs
+      lenys = length ys
+  in case compare lenxs lenys of
+    LT => fail $ "Provided list is too short to exactly cover all constructors. "
+             ++ "Given " ++ show lenxs ++ ", needs " ++ show lenys ++ " elements."
+    GT => fail $ "Provided list is too long to exactly cover all constructors. "
+             ++ "Given " ++ show lenxs ++ ", needs " ++ show lenys ++ " elements."
     EQ => pure ()
 
 enumName : TTImp -> Maybe Name
@@ -183,6 +187,8 @@ enumFrom xs = do
     Just (IPi _ _ _ _ `(Int) `(Prelude.Types.Maybe ~(ty))) <- goal
       | _ => fail "Required type is not: Int -> Maybe x"
     n <- checkEnumType ty
+    logTerm "enumfrom" 1 "ty" ty
+    logTerm "enumfrom" 1 "nam" (IVar eFC n)
     cons <- conNames n
     checkList xs cons
     clauses <- traverse clause (zip xs cons)
@@ -190,7 +196,11 @@ enumFrom xs = do
     check `(\lam => ~(ICase eFC `(lam) `(_) (clauses ++ catchall_clause)))
   where
     clause : (a, Name) -> Elab Clause
-    clause (i,n) = pure $ PatClause eFC !(quote i) `(Just ~(IVar eFC n))
+    clause (i,n) = do
+      r <- quote i
+      logTerm "enumfrom" 1 "clausenam" (IVar eFC n)
+      logTerm "enumfrom" 1 "clausequot" r
+      pure $ PatClause eFC r `(Just ~(IVar eFC n))
 
 ||| Maps x's constructors to given List of Ints, resulting function's behavior
 ||| is undefined if given an Int that is not mapped.
@@ -213,6 +223,9 @@ unsafeEnumFrom xs = do
 -- Examples
 -------------------------------------------------
 
+-- some things are ' to avoid namespace clashes, private isn't as private
+-- as it seems
+
 -- simple enumeration type, the main target of this module
 data Foo = Biz | Baz
 
@@ -234,12 +247,12 @@ data IFoo2 : Nat -> Type where
 
 private
 interface ToCode' a where
-  toCode : a -> Int
+  toCode' : a -> Int
 
 private
 interface FromCode' a where
-  fromCode : Int -> Maybe a
-  unsafeFromCode : Int -> a
+  fromCode' : Int -> Maybe a
+  unsafeFromCode' : Int -> a
 
 private
 Show Foo where
@@ -263,12 +276,12 @@ Ord Foo where
 
 private
 ToCode' Foo where
-  toCode = enumTo [0,1]
+  toCode' = enumTo [0,1]
 
 private
 FromCode' Foo where
-  unsafeFromCode = unsafeEnumFrom [0,1]
-  fromCode = enumFrom [0,1]
+  unsafeFromCode' = unsafeEnumFrom [0,1]
+  fromCode' = enumFrom [0,1]
 
 eqTest1 : Baz == Baz = True
 eqTest1 = Refl
@@ -276,19 +289,19 @@ eqTest1 = Refl
 eqTest2 : Baz == Biz = False
 eqTest2 = Refl
 
-enumToTest1 : toCode Baz == 1 = True
+enumToTest1 : toCode' Baz == 1 = True
 enumToTest1 = Refl
 
-enumFromTest1 : unsafeFromCode 0 == Biz = True
+enumFromTest1 : unsafeFromCode' 0 == Biz = True
 enumFromTest1 = Refl
 
-enumFromTest2 : unsafeFromCode (-12345) == Baz = True
+enumFromTest2 : unsafeFromCode' (-12345) == Baz = True
 enumFromTest2 = ?crash
 
-enumFromSafeTest1 : fromCode 0 == Just Biz = True
+enumFromSafeTest1 : fromCode' 0 == Just Biz = True
 enumFromSafeTest1 = Refl
 
-enumFromSafeTest2 : fromCode 3 == Nothing {ty=Foo} = True
+enumFromSafeTest2 : fromCode' 3 == Nothing {ty=Foo} = True
 enumFromSafeTest2 = Refl
 
 showTest1 : show Baz == "Baz" = True
