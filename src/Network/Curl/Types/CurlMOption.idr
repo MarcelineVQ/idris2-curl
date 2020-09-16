@@ -21,13 +21,13 @@ data CurlMOption : OptType -> Type where
   CURLMOPT_MAX_PIPELINE_LENGTH : CurlMOption CURLOPTTYPE_LONG
   CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE : CurlMOption CURLOPTTYPE_OFF_T
   CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE : CurlMOption CURLOPTTYPE_OFF_T
-  CURLMOPT_PIPELINING_SITE_BL : CurlMOption CURLOPTTYPE_OBJECTPOINT
-  CURLMOPT_PIPELINING_SERVER_BL : CurlMOption CURLOPTTYPE_OBJECTPOINT
+  CURLMOPT_PIPELINING_SITE_BL : CurlMOption UnusedOptType
+  CURLMOPT_PIPELINING_SERVER_BL : CurlMOption UnusedOptType
   CURLMOPT_MAX_TOTAL_CONNECTIONS : CurlMOption CURLOPTTYPE_LONG
   CURLMOPT_PUSHFUNCTION : CurlMOption CURLOPTTYPE_FUNCTIONPOINT
   CURLMOPT_PUSHDATA : CurlMOption CURLOPTTYPE_OBJECTPOINT
   CURLMOPT_MAX_CONCURRENT_STREAMS : CurlMOption CURLOPTTYPE_LONG
-  CURLMOPT_LASTENTRY : CurlMOption CURLOPTTYPE_LONG -- not used
+  CURLMOPT_LASTENTRY : CurlMOption UnusedOptType -- not used
 
 [derivedToCode] ToCode (CurlMOption ty) where
   toCode = enumTo [1..17]
@@ -84,7 +84,4 @@ paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLMOPT_TIMERFUNCTION
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLMOPT_PUSHFUNCTION
   = (parent : Ptr HandlePtr) -> (easy : Ptr HandlePtr) -> (num_headers : Int) ->
     (pushheaders_struct : AnyPtr) -> (userp : AnyPtr) -> PrimIO Int
--- paramType CURLMOPT_PIPELINING_SITE_BL = Void   -- not used by curl
--- paramType CURLMOPT_PIPELINING_SERVER_BL = Void -- not used by curl
--- paramType CURLMOPT_LASTENTRY = Void            -- not used by curl
 paramType opt = optType ty

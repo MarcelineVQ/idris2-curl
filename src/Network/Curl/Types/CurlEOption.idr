@@ -291,7 +291,7 @@ data CurlEOption : OptType -> Type where
   CURLOPT_ISSUERCERT_BLOB : CurlEOption CURLOPTTYPE_BLOB
   CURLOPT_PROXY_ISSUERCERT : CurlEOption CURLOPTTYPE_OBJECTPOINT
   CURLOPT_PROXY_ISSUERCERT_BLOB : CurlEOption CURLOPTTYPE_BLOB
-  CURLOPT_LASTENTRY : CurlEOption CURLOPTTYPE_LONG -- Not used.
+  CURLOPT_LASTENTRY : CurlEOption UnusedOptType -- Not used.
 
 curlOptEnumList : List Int
 curlOptEnumList = difference [1..298]

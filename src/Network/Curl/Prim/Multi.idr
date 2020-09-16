@@ -112,6 +112,7 @@ mSetOptPrim opt = do
 
 -- hideous but we only need to define it once
 export
+total
 curl_multi_setopt : HasIO io => CurlHandle Multi -> {ty : _}
                  -> (opt : CurlMOption ty) -> paramType opt -> io CurlMCode
 curl_multi_setopt (MkH h) opt@CURLMOPT_SOCKETFUNCTION v = do
@@ -123,13 +124,8 @@ curl_multi_setopt (MkH h) opt@CURLMOPT_TIMERFUNCTION v = do
 curl_multi_setopt (MkH h) opt@CURLMOPT_PUSHFUNCTION v = do
     let prim = mSetOptPrim opt
     pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
-
 curl_multi_setopt (MkH h) opt@CURLMOPT_PIPELINING v = pure $ -- special, bitmask, TODO, determine if we care
     unsafeFromCode !(primIO $ prim_curl_multi_setopt_long h (toCode opt) v)
-curl_multi_setopt _ CURLMOPT_PIPELINING_SITE_BL _ = pure CURLM_UNKNOWN_OPTION -- should really be staticly prohibited
-curl_multi_setopt _ CURLMOPT_PIPELINING_SERVER_BL _ = pure CURLM_UNKNOWN_OPTION -- should really be staticly prohibited
-curl_multi_setopt _ CURLMOPT_LASTENTRY _ = pure CURLM_UNKNOWN_OPTION -- should really be staticly prohibited
-
 curl_multi_setopt {ty = CURLOPTTYPE_LONG} (MkH h) opt v = pure $
     unsafeFromCode !(primIO $ prim_curl_multi_setopt_long h (toCode opt) v)
 curl_multi_setopt {ty = CURLOPTTYPE_OBJECTPOINT} (MkH h) opt v = pure $
@@ -138,6 +134,7 @@ curl_multi_setopt {ty = CURLOPTTYPE_OFF_T} (MkH h) opt v = pure $
     unsafeFromCode !(primIO $ prim_curl_multi_setopt_off_t h (toCode opt) v)
 curl_multi_setopt {ty = CURLOPTTYPE_BLOB} (MkH h) opt v = pure $
     unsafeFromCode !(primIO $ prim_curl_multi_setopt_blob h (toCode opt) v)
+curl_multi_setopt {ty = UnusedOptType} _ _ _ = pure CURLM_UNKNOWN_OPTION -- can't happen
 
 useoptest : IO ()
 useoptest = do
@@ -146,5 +143,6 @@ useoptest = do
   CURLM_OK <- curl_multi_setopt r CURLMOPT_SOCKETFUNCTION $ \h,sock,info,dat,sdat => toPrim $ do
       pure 0
     | o => printLn o
+  -- curl_multi_setopt r CURLMOPT_LASTENTRY ?this_accepts_only_void
   putStrLn "was set"
   curl_multi_cleanup r
