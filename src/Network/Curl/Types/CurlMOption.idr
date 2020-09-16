@@ -73,20 +73,9 @@ export
 Ord CurlPollInfo where
   compare = compareEnum
 
-||| Casing ty first in this way lets us write functions that depend on this in a
-||| much more pleasing way, since the class of parameters narrows down the
-||| potential constructors very quickly we can case on `ty` before `CurlMOption`
-||| to vastly reduce the cases to consider. We call out to optType despite
-||| already casing ty to keep the types consistent between easy and multi.
 public export
+total
 paramType : {ty : _} -> CurlMOption ty -> Type
-paramType {ty = ty@CURLOPTTYPE_LONG} opt = optType ty
-paramType {ty = ty@CURLOPTTYPE_OBJECTPOINT} opt = optType ty
-paramType {ty = ty@CURLOPTTYPE_OFF_T} opt = optType ty
-paramType {ty = ty@CURLOPTTYPE_BLOB} opt = optType ty
-paramType CURLMOPT_PIPELINING_SITE_BL = Void   -- not used by curl
-paramType CURLMOPT_PIPELINING_SERVER_BL = Void -- not used by curl
-paramType CURLMOPT_LASTENTRY = Void            -- not used by curl
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLMOPT_SOCKETFUNCTION
   = Ptr HandlePtr -> (socket : Int) -> (pollinfo : Int) ->
     (socketdata : AnyPtr) -> (multi_assign : AnyPtr) -> PrimIO Int
@@ -95,3 +84,7 @@ paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLMOPT_TIMERFUNCTION
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLMOPT_PUSHFUNCTION
   = (parent : Ptr HandlePtr) -> (easy : Ptr HandlePtr) -> (num_headers : Int) ->
     (pushheaders_struct : AnyPtr) -> (userp : AnyPtr) -> PrimIO Int
+-- paramType CURLMOPT_PIPELINING_SITE_BL = Void   -- not used by curl
+-- paramType CURLMOPT_PIPELINING_SERVER_BL = Void -- not used by curl
+-- paramType CURLMOPT_LASTENTRY = Void            -- not used by curl
+paramType opt = optType ty

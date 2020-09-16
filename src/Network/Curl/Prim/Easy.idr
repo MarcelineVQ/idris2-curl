@@ -102,16 +102,15 @@ prim_curl_easy_setopt : Ptr HandlePtr -> Int -> any -> PrimIO CurlECode
 -- We can't pass 'any' or an arbitrary Type to a foreign function, but we can
 -- generate that function at the type we need.
 %macro
-eSetOptPrim : {ty : _} -> (opt : CurlEOption ty)
+eSetOptPrim : {opty : _} -> (opt : CurlEOption opty)
            -> Elab (Ptr HandlePtr -> Int -> paramType opt -> PrimIO Int)
 eSetOptPrim opt = do
   let name = UN $ "setOptPrim_" ++ show opt
   z <- quote (paramType opt)
-  -- logTerm "prim2" 1 "" z
-  let b = MkTy EmptyFC name `(Ptr HandlePtr -> Int -> ~z -> PrimIO Int)
-  let r = IClaim EmptyFC MW Private
-            [ForeignFn ["C:curl_easy_setopt,libcurl,curl/curl.h"]] b
-  declare [r] -- generate prim
+  let ty = MkTy EmptyFC name `(Ptr HandlePtr -> Int -> ~z -> PrimIO Int)
+  let claim = IClaim EmptyFC MW Private
+                [ForeignFn ["C:curl_multi_setopt,libcurl,curl/curl.h"]] ty
+  declare [claim] -- generate prim
   check (IVar EmptyFC name) -- insert prim's name
 
 

@@ -99,52 +99,52 @@ prim_curl_multi_setopt : Ptr HandlePtr -> Int -> any -> PrimIO CurlECode
 -- used instead of with the let. Possibly this is a parsing issue wih %runElab
 -- or my own misunderstanding.
 %macro
-mSetOptPrim : {ty : _} -> (opt : CurlMOption ty)
+mSetOptPrim : {opty : _} -> (opt : CurlMOption opty)
            -> Elab (Ptr HandlePtr -> Int -> paramType opt -> PrimIO Int)
 mSetOptPrim opt = do
   let name = UN $ "setOptPrim_" ++ show opt
   z <- quote (paramType opt)
-  -- logTerm "prim2" 1 "" z
-  let b = MkTy EmptyFC name `(Ptr HandlePtr -> Int -> ~z -> PrimIO Int)
-  let r = IClaim EmptyFC MW Private
-            [ForeignFn ["C:curl_multi_setopt,libcurl,curl/curl.h"]] b
-  declare [r] -- generate prim
+  let ty = MkTy EmptyFC name `(Ptr HandlePtr -> Int -> ~z -> PrimIO Int)
+  let claim = IClaim EmptyFC MW Private
+                [ForeignFn ["C:curl_multi_setopt,libcurl,curl/curl.h"]] ty
+  declare [claim] -- generate prim
   check (IVar EmptyFC name) -- insert prim's name
-
 
 -- hideous but we only need to define it once
 export
 curl_multi_setopt : HasIO io => CurlHandle Multi -> {ty : _}
                  -> (opt : CurlMOption ty) -> paramType opt -> io CurlMCode
-curl_multi_setopt {ty = CURLOPTTYPE_FUNCTIONPOINT} (MkH h)
-    opt@CURLMOPT_SOCKETFUNCTION v = do
-      let prim = mSetOptPrim opt
-      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
-curl_multi_setopt {ty = CURLOPTTYPE_FUNCTIONPOINT} (MkH h)
-    opt@CURLMOPT_TIMERFUNCTION v = do
-      let prim = mSetOptPrim opt
-      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
-curl_multi_setopt {ty = CURLOPTTYPE_FUNCTIONPOINT} (MkH h)
-    opt@CURLMOPT_PUSHFUNCTION v = do
-      let prim = mSetOptPrim opt
-      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
-curl_multi_setopt (MkH h) opt@CURLMOPT_PIPELINING v = do  -- special, bitmask, TODO, determine if we care
-    pure (unsafeFromCode !(primIO $ prim_curl_multi_setopt_long h (toCode opt) v))
-curl_multi_setopt h CURLMOPT_LASTENTRY v = pure CURLM_UNKNOWN_OPTION
-curl_multi_setopt {ty = CURLOPTTYPE_LONG} (MkH h) opt v = pure $
-  unsafeFromCode !(primIO $ prim_curl_multi_setopt_long h (toCode opt) v)
-curl_multi_setopt {ty = CURLOPTTYPE_OBJECTPOINT} (MkH h) opt v = pure $
-  unsafeFromCode !(primIO $ prim_curl_multi_setopt_objptr h (toCode opt) v)
-curl_multi_setopt {ty = CURLOPTTYPE_OFF_T} (MkH h) opt v = pure $
-  unsafeFromCode !(primIO $ prim_curl_multi_setopt_off_t h (toCode opt) v)
-curl_multi_setopt {ty = CURLOPTTYPE_BLOB} (MkH h) opt v = pure $
-  unsafeFromCode !(primIO $ prim_curl_multi_setopt_blob h (toCode opt) v)
+curl_multi_setopt (MkH h) opt@CURLMOPT_SOCKETFUNCTION v = do
+    let prim = mSetOptPrim opt
+    pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_multi_setopt (MkH h) opt@CURLMOPT_TIMERFUNCTION v = do
+    let prim = mSetOptPrim opt
+    pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_multi_setopt (MkH h) opt@CURLMOPT_PUSHFUNCTION v = do
+    let prim = mSetOptPrim opt
+    pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
 
-useopt : IO ()
-useopt = do
+curl_multi_setopt (MkH h) opt@CURLMOPT_PIPELINING v = pure $ -- special, bitmask, TODO, determine if we care
+    unsafeFromCode !(primIO $ prim_curl_multi_setopt_long h (toCode opt) v)
+curl_multi_setopt _ CURLMOPT_PIPELINING_SITE_BL _ = pure CURLM_UNKNOWN_OPTION -- should really be staticly prohibited
+curl_multi_setopt _ CURLMOPT_PIPELINING_SERVER_BL _ = pure CURLM_UNKNOWN_OPTION -- should really be staticly prohibited
+curl_multi_setopt _ CURLMOPT_LASTENTRY _ = pure CURLM_UNKNOWN_OPTION -- should really be staticly prohibited
+
+curl_multi_setopt {ty = CURLOPTTYPE_LONG} (MkH h) opt v = pure $
+    unsafeFromCode !(primIO $ prim_curl_multi_setopt_long h (toCode opt) v)
+curl_multi_setopt {ty = CURLOPTTYPE_OBJECTPOINT} (MkH h) opt v = pure $
+    unsafeFromCode !(primIO $ prim_curl_multi_setopt_objptr h (toCode opt) v)
+curl_multi_setopt {ty = CURLOPTTYPE_OFF_T} (MkH h) opt v = pure $
+    unsafeFromCode !(primIO $ prim_curl_multi_setopt_off_t h (toCode opt) v)
+curl_multi_setopt {ty = CURLOPTTYPE_BLOB} (MkH h) opt v = pure $
+    unsafeFromCode !(primIO $ prim_curl_multi_setopt_blob h (toCode opt) v)
+
+useoptest : IO ()
+useoptest = do
   Just r <- curl_multi_init
     | _ => printLn "foo"
-  CURLM_OK <- curl_multi_setopt r CURLMOPT_SOCKETFUNCTION $ \h,sock,info,dat,sdat => do
-      prim__io_pure 0
+  CURLM_OK <- curl_multi_setopt r CURLMOPT_SOCKETFUNCTION $ \h,sock,info,dat,sdat => toPrim $ do
+      pure 0
     | o => printLn o
+  putStrLn "was set"
   curl_multi_cleanup r

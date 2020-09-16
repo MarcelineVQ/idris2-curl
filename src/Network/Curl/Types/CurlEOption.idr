@@ -317,18 +317,8 @@ public export
 Show (CurlEOption ty) where
   show = showEnum
 
-||| Casing ty first in this way lets us write functions that depend on this in a
-||| much more pleasing way, since the class of parameters narrows down the
-||| potential constructors very quickly we can case on `ty` before `CurlMOption`
-||| to vastly reduce the cases to consider. We call out to optType despite
-||| already casing ty to keep the types consistent between easy and multi.
 public export
 paramType : {ty : _} -> CurlEOption ty -> Type
-paramType {ty = ty@CURLOPTTYPE_LONG} opt = optType ty
-paramType {ty = ty@CURLOPTTYPE_OBJECTPOINT} opt = optType ty
-paramType {ty = ty@CURLOPTTYPE_OFF_T} opt = optType ty
-paramType {ty = ty@CURLOPTTYPE_BLOB} opt = optType ty
-paramType CURLOPT_LASTENTRY = Void -- not used by curl
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_WRITEFUNCTION
   = ?dsffsdfsd_4
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_READFUNCTION
@@ -373,7 +363,7 @@ paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_RESOLVER_START_FUNCTION
   = ?dsffsdfsd_24
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_TRAILERFUNCTION
   = ?dsffsdfsd_25
-
+paramType opt = optType ty
 
 -- paramType CURLOPT_WRITEFUNCTION
   -- = Buffer -> (size : Int) -> (nmemb : Int) -> AnyPtr -> PrimIO Int -- returns amount dealth with
