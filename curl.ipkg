@@ -1,7 +1,7 @@
 package curl
 
 authors    = "MarcelineVQ"
-version    = "0.10.2.0"
+version    = "0.12.2.0"
 readme     = "README.md"
 
 homepage   = "https://github.com/MarcelineVQ/idris2-curl"
@@ -23,13 +23,16 @@ modules =
 
  -- Private
   , Network.Curl.Types.Code
-  , Network.Curl.Types.CurlCode
-  , Network.Curl.Types.Option
+  , Network.Curl.Types.CurlECode
+  , Network.Curl.Types.CurlMCode
+  , Network.Curl.Types.OptType
+  , Network.Curl.Types.CurlEOption
+  , Network.Curl.Types.CurlMOption
 
   , Network.Curl.Prim
   , Network.Curl.Prim.Easy
   , Network.Curl.Prim.Global
-  , Network.Curl.Prim.Mem
+  -- , Network.Curl.Prim.Mem
   , Network.Curl.Prim.Multi
   , Network.Curl.Prim.Mime
   , Network.Curl.Prim.Other

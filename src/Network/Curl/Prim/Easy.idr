@@ -24,10 +24,11 @@ module Network.Curl.Prim.Easy
 
 import Data.Buffer
 
-import Network.Curl.Prim.Mem
+-- import Network.Curl.Prim.Mem
 import Network.Curl.Prim.Other
 
 import Network.Curl.Types
+-- import Network.Curl.Types.CurlEOption as EO
 -- import Derive.Enum
 
 import Derive.Prim
@@ -35,16 +36,18 @@ import Derive.Prim
 
 -- curl_easy_cleanup
 %runElab makeHasIO "curl_easy_cleanup" Export
-           ["C:curl_easy_cleanup,libcurl,curl/curl.h"]
-          `[ prim_curl_easy_cleanup : Ptr HandlePtr -> PrimIO () ] --`
+          `[ %foreign "C:curl_easy_cleanup,libcurl,curl/curl.h"
+             export
+             prim_curl_easy_cleanup : Ptr HandlePtr -> PrimIO () ] --`
 
 -------------------------------------------------
 
 
 -- curl_easy_duphandle
 %runElab makeHasIO "curl_easy_duphandle" Export
-           ["C:curl_easy_duphandle,libcurl,curl/curl.h"]
-          `[ prim_curl_easy_duphandle : Ptr HandlePtr -> PrimIO (Ptr HandlePtr) ] --`
+          `[ %foreign "C:curl_easy_duphandle,libcurl,curl/curl.h"
+             export
+             prim_curl_easy_duphandle : Ptr HandlePtr -> PrimIO (Ptr HandlePtr) ] --`
 
 -------------------------------------------------
 
@@ -73,41 +76,79 @@ curl_easy_init = do r <- primIO prim_curl_easy_init
 curl_easy_strerror : (curlcode : Int) -> String
 
 export
-curlEasyStrError : CurlCode -> String
+curlEasyStrError : CurlECode -> String
 curlEasyStrError c = curl_easy_strerror (toCode c)
 
 -------------------------------------------------
 
 
- -- -> IO LBytes
-
--- we can use IORef as an accumulator for this
--- write_callback : (Buffer -> Int -> Int -> AnyPtr -> IO Int) -> IO Int
--- write_callback f = ?write_callback_rhs
-
-%foreign "C:curl_easy_setopt,libcurl,curl/curl.h"
-prim_curl_easy_setopt_string : Ptr HandlePtr -> Int -> String -> PrimIO Int
-
 %foreign "C:curl_easy_setopt,libcurl,curl/curl.h"
 prim_curl_easy_setopt_long : Ptr HandlePtr -> Int -> Int -> PrimIO Int
 
 %foreign "C:curl_easy_setopt,libcurl,curl/curl.h"
-prim_curl_easy_setopt_fcallback : Ptr HandlePtr -> Int -> (String -> Int -> Int -> AnyPtr -> PrimIO Int) -> PrimIO Int
+prim_curl_easy_setopt_objptr : Ptr HandlePtr -> Int -> AnyPtr -> PrimIO Int
 
--- curl_easy_setopt_fcallback : Ptr HandlePtr -> Int -> (AnyPtr -> Int -> Int -> AnyPtr -> IO Int) -> PrimIO Int
--- curl_easy_setopt_fcallback h y f z = ?curl_easy_setopt_fcallback_rhs  
+%foreign "C:curl_easy_setopt,libcurl,curl/curl.h"
+prim_curl_easy_setopt_off_t : Ptr HandlePtr -> Int -> Bits64 -> PrimIO Int
+
+%foreign "C:curl_easy_setopt,libcurl,curl/curl.h"
+prim_curl_easy_setopt_blob : Ptr HandlePtr -> Int -> Buffer -> PrimIO Int
+
+-- This is to fill the role of
+{-
+%foreign "C:curl_easy_setopt,libcurl,curl/curl.h"
+prim_curl_easy_setopt : Ptr HandlePtr -> Int -> any -> PrimIO CurlECode
+-}
+-- We can't pass 'any' or an arbitrary Type to a foreign function, but we can
+-- generate that function at the type we need.
+%macro
+eSetOptPrim : {ty : _} -> (opt : CurlEOption ty)
+           -> Elab (Ptr HandlePtr -> Int -> paramType opt -> PrimIO Int)
+eSetOptPrim opt = do
+  let name = UN $ "setOptPrim_" ++ show opt
+  z <- quote (paramType opt)
+  -- logTerm "prim2" 1 "" z
+  let b = MkTy EmptyFC name `(Ptr HandlePtr -> Int -> ~z -> PrimIO Int)
+  let r = IClaim EmptyFC MW Private
+            [ForeignFn ["C:curl_easy_setopt,libcurl,curl/curl.h"]] b
+  declare [r] -- generate prim
+  check (IVar EmptyFC name) -- insert prim's name
+
 
 export
-curl_easy_setopt : HasIO io => {ty : _} -> CurlHandle Easy -> CurlOption ty -> paramTy ty -> io CurlCode
-curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_LONG} v
-  = unsafeFromCode <$> primIO (prim_curl_easy_setopt_long h (toCode op) v)
-curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_FUNCTIONPOINT} v
-  = map unsafeFromCode . primIO $ prim_curl_easy_setopt_fcallback h (toCode op) (\a,b,c,d => toPrim (v a b c d))
-curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_OBJECTPOINT} v = ?dsf_3
-curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_OFF_T} v = ?dsf_6
-curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_BLOB} v = ?dsf_6s
-
-  -- = fromCode <$> primIO (prim_curl_easy_setopt x (toCode y) (believe_me z))
+curl_easy_setopt : HasIO io => CurlHandle Easy -> {ty : _}
+                -> (opt : CurlEOption ty) -> paramType opt -> io CurlECode
+curl_easy_setopt (MkH h) opt@CURLOPT_WRITEFUNCTION v
+  = ?fewfsdf
+curl_easy_setopt (MkH h) opt@CURLOPT_READFUNCTION v
+  = ?dsfd2s
+curl_easy_setopt (MkH h) opt@CURLOPT_PROGRESSFUNCTION v = ?ds3fds
+curl_easy_setopt (MkH h) opt@CURLOPT_HEADERFUNCTION v = ?dsfd4s
+curl_easy_setopt (MkH h) opt@CURLOPT_DEBUGFUNCTION v = ?dsfds5
+curl_easy_setopt (MkH h) opt@CURLOPT_SSL_CTX_FUNCTION v = ?dsf6ds
+curl_easy_setopt (MkH h) opt@CURLOPT_IOCTLFUNCTION v = ?dsfds7
+curl_easy_setopt (MkH h) opt@CURLOPT_CONV_FROM_NETWORK_FUNCTION v = ?dsfds8
+curl_easy_setopt (MkH h) opt@CURLOPT_CONV_TO_NETWORK_FUNCTION v = ?dsfds9
+curl_easy_setopt (MkH h) opt@CURLOPT_CONV_FROM_UTF8_FUNCTION v = ?dsfds14
+curl_easy_setopt (MkH h) opt@CURLOPT_SOCKOPTFUNCTION v = ?dsfds2
+curl_easy_setopt (MkH h) opt@CURLOPT_OPENSOCKETFUNCTION v = ?dsf3ds
+curl_easy_setopt (MkH h) opt@CURLOPT_SEEKFUNCTION v = ?dsfds412
+curl_easy_setopt (MkH h) opt@CURLOPT_SSH_KEYFUNCTION v = ?dsfd2s123
+curl_easy_setopt (MkH h) opt@CURLOPT_INTERLEAVEFUNCTION v = ?ds1fds
+curl_easy_setopt (MkH h) opt@CURLOPT_CHUNK_BGN_FUNCTION v = ?ds4fds
+curl_easy_setopt (MkH h) opt@CURLOPT_CHUNK_END_FUNCTION v = ?dsf786ds
+curl_easy_setopt (MkH h) opt@CURLOPT_FNMATCH_FUNCTION v = ?dsfds3
+curl_easy_setopt (MkH h) opt@CURLOPT_CLOSESOCKETFUNCTION v = ?ds4f123ds
+curl_easy_setopt (MkH h) opt@CURLOPT_XFERINFOFUNCTION v = ?dsf1ds
+curl_easy_setopt (MkH h) opt@CURLOPT_RESOLVER_START_FUNCTION v = ?ds231fds
+curl_easy_setopt (MkH h) opt@CURLOPT_TRAILERFUNCTION v = ?dsf1ds12
+curl_easy_setopt (MkH h) opt@CURLOPT_LASTENTRY v = ?Fewf
+curl_easy_setopt {ty = CURLOPTTYPE_LONG} (MkH h) opt v = ?asFewf_1
+curl_easy_setopt {ty = CURLOPTTYPE_OBJECTPOINT} (MkH h) opt v = ?asFewf_2
+curl_easy_setopt {ty = CURLOPTTYPE_OFF_T} (MkH h) opt v = ?asFewf_4
+curl_easy_setopt {ty = CURLOPTTYPE_BLOB} (MkH h) opt v = ?asFewf_5
+curl_easy_setopt {ty = CURLOPTTYPE_FUNCTIONPOINT} (MkH h) opt v = do
+  ?asFewf_3
 
 -------------------------------------------------
 
@@ -116,7 +157,7 @@ curl_easy_setopt (MkH h) op {ty = CURLOPTTYPE_BLOB} v = ?dsf_6s
 prim_curl_easy_perform : Ptr HandlePtr -> PrimIO Int
 
 export
-curl_easy_perform : HasIO io => CurlHandle Easy -> io CurlCode
+curl_easy_perform : HasIO io => CurlHandle Easy -> io CurlECode
 curl_easy_perform (MkH ptr) = unsafeFromCode <$> primIO (prim_curl_easy_perform ptr)
 
 -------------------------------------------------
@@ -143,6 +184,8 @@ curl_easy_escape (MkH h) str = primIO $ prim_curl_easy_escape h str 0
 
 -------------------------------------------------
 
+{-
+
 -- This String is allocated by curl but idris ffi should copy it so we should be
 -- safe in the presence or lack of curl_free.
 -- TODO check this ^
@@ -151,10 +194,15 @@ curl_easy_escape (MkH h) str = primIO $ prim_curl_easy_escape h str 0
 prim_curl_easy_unescape : Ptr HandlePtr -> (url : String) -> (url_len : Int)
                        -> (intptr : Buffer) -> PrimIO String
 
+%foreign "C:curl_easy_unescape,libcurl,curl/curl.h"
+prim_curl_easy_unescape' : Ptr HandlePtr -> (url : String) -> (url_len : Int)
+                        -> Ptr Int -> PrimIO String
+
+
+
 ||| Unescapes a String byte-by-byte without awareness of encoding. When
 ||| encountering %00 or some other source of \0 it returns as much of the String
 ||| as it got to that point.
-
 ||| NB I'm not bothering with proper handling %00, if you need this I'll accept
 ||| a tested PR though. It's just that idris's \0 terminated Strings can make
 ||| this a hassle. I'll revisit this when/if I made a Text type since it won't
@@ -182,3 +230,5 @@ testo = do
   printLn m
 
 -------------------------------------------------
+
+-}

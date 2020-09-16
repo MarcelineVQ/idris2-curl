@@ -30,5 +30,6 @@ import Derive.Prim
 -------------------------------------------------
 
 %runElab makeHasIO "curl_free" Export
-           ["C:curl_free,libcurl,curl/curl.h"]
-          `[ prim_curl_free : Ptr Bits8 -> PrimIO () ] --`
+          `[ %foreign "C:curl_free,libcurl,curl/curl.h"
+             export
+             prim_curl_free : Ptr Bits8 -> PrimIO () ] --`

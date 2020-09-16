@@ -2,23 +2,57 @@ module Network.Curl.Prim.Mem
 
 import public Data.Buffer
 
+import Derive.Prim
+%language ElabReflection
+
 -- TODO tests these instances
 -- We should be using Nat some places but it's not especially convenient
 
+-- Redefined to avoid Maybe, if we can't allocate memory then die.
 %foreign "scheme:blodwen-new-buffer"
 prim_newBuffer' : Int -> PrimIO Buffer
+
+-- %foreign "scheme:foreign-alloc"
+-- prim_foreign_alloc : 
+
+%runElab makeHasIO "foreign_alloc" Export
+          `[ %foreign "scheme,chez:foreign_alloc"
+                      "scheme,racket:malloc"
+                      "C:malloc"
+             export
+             prim_foreign_alloc : (bytes : Int) -> PrimIO AnyPtr ] --`
+
+%runElab makeHasIO "foreign_peek" Export
+          `[ %foreign "scheme,chez:foreign_alloc"
+                      "scheme,racket:malloc"
+                      "C:malloc"
+             export
+             prim_foreign_alloc : (bytes : Int) -> PrimIO AnyPtr ] --`
+
+%runElab makeHasIO "foreign_poke" Export
+          `[ %foreign "scheme,chez:foreign_alloc"
+                      "scheme,racket:malloc"
+                      "C:malloc"
+             export
+             prim_foreign_alloc : (bytes : Int) -> PrimIO AnyPtr ] --`
+
+%runElab makeHasIO "foreign_free" Export
+          `[ %foreign "scheme,chez:foreign_free"
+                      "scheme,racket:free"
+                      "C:free"
+             export
+             prim_foreign_alloc : (bytes : Int) -> PrimIO AnyPtr ] --`
+
+
 
 export
 newBuffer' : HasIO io => (bytes : Int) -> io Buffer
 newBuffer' size = primIO $ prim_newBuffer' size
--- No Maybe, if we can't allocate memory then die.
-
-data PtrType = Raw | GC
 
 ||| If we extend this to support pointer math keep in mind that Buffer isn't
 ||| exactly a ptr since it has an intrinsic size, it just works as a ptr for
-||| foreign calls.
-public export
+||| foreign calls in chez and racket.
+export
 data ForeignPtr : Type -> Type where
   MkFP : Buffer -> ForeignPtr a
 %name MkFP fp
@@ -94,7 +128,7 @@ export
 getStringFrom : HasIO io => ForeignPtr Bits8 -> Int -> Int -> io String
 getStringFrom (MkFP fp) off len = getString fp off len
 
--- There a method for getting int and method for getting int32, int32 isn't a
+-- There is a method for getting int and method for getting int32, int32 isn't a
 -- distinct type though so I'm not sure what is being implied there. the chez
 -- backend has int as 63 bits
 export

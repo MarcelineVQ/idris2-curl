@@ -1,7 +1,9 @@
 Idris2 Curl Bindings
 =====
 
-2020-09-06: This will not build until I've patched idris2 which I will do shortly.
+####2020-09-12: This will not build until I've patched idris2 which I will do shortly. In particular these PR's  
+https://github.com/idris-lang/Idris2/pull/646  
+https://github.com/idris-lang/Idris2/pull/663  
 
 I really don't want to write my own HTTP lib, so here's curl.  
 This will provide the Easy interface of direct all-at-once actions and the Multi interface which exposes the full power of curl.

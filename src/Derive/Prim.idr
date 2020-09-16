@@ -44,15 +44,14 @@ argCount retty = Z
    Still it can alleviate some of the write-twice burden PrimIO can introduce.
 -}
 export
-makeHasIO : String -> Visibility -> List String -> List Decl -> Elab ()
-makeHasIO funname0 vis str ys = do
-    [IClaim pfc pmw pvis _ pty@(MkTy tyfc primname primty)] <- pure ys
+makeHasIO : String -> Visibility -> List Decl -> Elab ()
+makeHasIO funname0 vis ys = do
+    [pclaim@(IClaim pfc pmw pvis _ pty@(MkTy tyfc primname primty))] <- pure ys
       | _ => fail "bad format"
     let funty = IPi eFC MW AutoImplicit Nothing
                `(HasIO ~(IBindVar eFC "io"))
                (spiderType primty)
         funname = UN funname0
-        primclaim = IClaim pfc pmw pvis [ForeignFn str] pty
         funclaim = IClaim eFC pmw vis [] (MkTy tyfc funname funty)
         varnames = map (("var" ++) . show) [0..]
         lvars = IBindVar eFC <$> take (argCount primty) varnames
@@ -61,7 +60,7 @@ makeHasIO funname0 vis str ys = do
         rhs = `(primIO ~(foldl (\xs,x => `(~xs ~x)) (toIVar primname) rvars))
         patclause = PatClause eFC lhs rhs
         funbody = IDef eFC funname [patclause]
-    declare [primclaim] -- declare the primitive as-given
+    declare [pclaim] -- declare the primitive as-given
     declare [funclaim, funbody] -- declare our HasIO version
     pure ()
   where
@@ -70,8 +69,10 @@ makeHasIO funname0 vis str ys = do
     spiderType (IApp _ `(PrimIO) retty) = `(~(toIBindVar "io") ~retty)
     spiderType ty = ty
 
-%runElab makeHasIO "what" Private ["C:div,libc,math.h"]
-                                 `[ prim_gob : Int -> Int -> PrimIO Int ] --`
+%runElab makeHasIO "what" Private
+  `[ %foreign "C:div,libc,math.h"
+     private
+     prim_gob : Int -> Int -> PrimIO Int ] --`
 
 gob_exists : PrimIO Int
 gob_exists = prim_gob 1 2
