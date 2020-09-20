@@ -29,16 +29,16 @@ data CurlMOption : OptType -> Type where
   CURLMOPT_MAX_CONCURRENT_STREAMS : CurlMOption CURLOPTTYPE_LONG
   CURLMOPT_LASTENTRY : CurlMOption UnusedOptType -- not used
 
+curlMOptEnumList : List Int
+curlMOptEnumList = [1..17]
+
 [derivedToCode] ToCode (CurlMOption ty) where
-  toCode = enumTo [1..17]
+  toCode = enumTo curlMOptEnumList
 
 -- Automate toCode plussing with the power of named instances
 public export
 {ty : _} -> ToCode (CurlMOption ty) where
   toCode opt = toCode @{derivedToCode} opt + toCode ty
-
--- FromCode (CurlMOption ty) where
-  -- fromCode = enumFrom [1..17]
 
 export
 Show (CurlMOption ty) where

@@ -9,7 +9,7 @@ import Derive.Enum
 
 public export
 data OptType
-  = UnusedOptType  -- -1, not part of curl, major convenience
+  = UnusedOptType  -- -10, not part of curl, convenience
   | CURLOPTTYPE_LONG -- at east 32 bits -- 0
   | CURLOPTTYPE_OBJECTPOINT             -- 10000
   | CURLOPTTYPE_FUNCTIONPOINT -- void*  -- 20000
@@ -18,13 +18,16 @@ data OptType
   -- | CURLOPTTYPE_STRINGPOINT -- char*    -- 10000 -- aliases for OBJECTPOINT
   -- | CURLOPTTYPE_SLISTPOINT              -- 10000 -- aliases for OBJECTPOINT
 
+curlOptTypeEnumList : List Int
+curlOptTypeEnumList = [-10,0,10000,20000,30000,40000]
+
 export
 ToCode OptType where
-  toCode = enumTo [-1,0,10000,20000,30000,40000]
+  toCode = enumTo curlOptTypeEnumList
 
 export
 FromCode OptType where
-  fromCode = enumFrom [-1,0,10000,20000,30000,40000]
+  fromCode = enumFrom curlOptTypeEnumList
 
 public export
 optType : OptType -> Type

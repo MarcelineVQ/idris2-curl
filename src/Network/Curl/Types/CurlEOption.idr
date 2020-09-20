@@ -291,15 +291,15 @@ data CurlEOption : OptType -> Type where
   CURLOPT_ISSUERCERT_BLOB : CurlEOption CURLOPTTYPE_BLOB
   CURLOPT_PROXY_ISSUERCERT : CurlEOption CURLOPTTYPE_OBJECTPOINT
   CURLOPT_PROXY_ISSUERCERT_BLOB : CurlEOption CURLOPTTYPE_BLOB
-  CURLOPT_LASTENTRY : CurlEOption UnusedOptType -- Not used.
+  CURLOPT_LASTENTRY : CurlEOption UnusedOptType
 
-curlOptEnumList : List Int
-curlOptEnumList = difference [1..298]
+curlEOptEnumList : List Int
+curlEOptEnumList = difference [1..298]
   [8,30,35,38,49,55,66,67,73,122,123,124,125,126,127,128,132,133]
 -- ^ remove enums omitted from curl.h
 
 [derivedToCode] ToCode (CurlEOption ty) where
-  toCode = enumTo curlOptEnumList
+  toCode = enumTo curlEOptEnumList
 
 -- Automate toCode plussing with the power of named instances
 public export
@@ -311,58 +311,60 @@ public export
 -- options. We can always do it manually though, but what a mess if so.
 
 -- [derivedFromCode] {ty :_} -> FromCode (CurlEOption ty) where
-  -- fromCode {ty} = ?aSDFfd_1
+  -- fromCode {ty} = ?aSDFfd_1  
 
 public export
 Show (CurlEOption ty) where
   show = showEnum
 
 public export
+total
 paramType : {ty : _} -> CurlEOption ty -> Type
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_WRITEFUNCTION
-  = ?dsffsdfsd_4
+  = Buffer -> (itemsize : Int) -> (len : Int) -> AnyPtr -> PrimIO Int
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_READFUNCTION
-  = ?dsffsdfsd_5
+  = Buffer -> (itemsize : Int) -> (len : Int) -> AnyPtr -> PrimIO Int
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_PROGRESSFUNCTION
-  = ?dsffsdfsd_6
+  = Void -- use CURLOPT_XFERINFOFUNCTION
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_HEADERFUNCTION
-  = ?dsffsdfsd_7
+  = Buffer -> (size : Int) -> (len : Int) -> AnyPtr -> PrimIO Int
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_DEBUGFUNCTION
-  = ?dsffsdfsd_8
+  = Void -- not implemented (yet)
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_SSL_CTX_FUNCTION
-  = ?dsffsdfsd_9
+  = Void -- not implemented (yet)
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_IOCTLFUNCTION
-  = ?dsffsdfsd_10
+  = Void -- not implemented (yet)
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_CONV_FROM_NETWORK_FUNCTION
-  = ?dsffsdfsd_11
+  = Void -- not implemented (yet)
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_CONV_TO_NETWORK_FUNCTION
-  = ?dsffsdfsd_12
+  = Void -- not implemented (yet)
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_CONV_FROM_UTF8_FUNCTION
-  = ?dsffsdfsd_13
+  = Void -- not implemented (yet)
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_SOCKOPTFUNCTION
-  = ?dsffsdfsd_14
+  = Void -- not implemented (yet)
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_OPENSOCKETFUNCTION
-  = ?dsffsdfsd_15
+  = Void -- not implemented (yet)
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_SEEKFUNCTION
-  = ?dsffsdfsd_16
+  = Void -- AnyPtr -> Bits64 -> Int -> PrimIO Int -- not implemented (yet) NB useful
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_SSH_KEYFUNCTION
-  = ?dsffsdfsd_17
+  = Void -- not implemented (yet)
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_INTERLEAVEFUNCTION
-  = ?dsffsdfsd_18
+  = Void -- not implemented (yet)
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_CHUNK_BGN_FUNCTION
-  = ?dsffsdfsd_19
+  = Void -- not implemented (yet)
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_CHUNK_END_FUNCTION
-  = ?dsffsdfsd_20
+  = Void -- not implemented (yet)
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_FNMATCH_FUNCTION
-  = ?dsffsdfsd_21
+  = Void -- not implemented (yet)
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_CLOSESOCKETFUNCTION
-  = ?dsffsdfsd_22
+  = AnyPtr -> (socket : Int) -> PrimIO Int
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_XFERINFOFUNCTION
-  = ?dsffsdfsd_23
+  = AnyPtr -> (dl_total : Bits64) -> (dl_now : Bits64)
+           -> (ul_total : Bits64) -> (ul_now : Bits64) -> PrimIO Int
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_RESOLVER_START_FUNCTION
-  = ?dsffsdfsd_24
+  = Void -- not implemented (yet)
 paramType {ty = CURLOPTTYPE_FUNCTIONPOINT} CURLOPT_TRAILERFUNCTION
-  = ?dsffsdfsd_25
+  = Void -- not implemented (yet)
 paramType opt = optType ty
 
 -- paramType CURLOPT_WRITEFUNCTION

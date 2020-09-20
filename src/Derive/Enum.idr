@@ -2,7 +2,7 @@ module Derive.Enum
 
 import Data.Nat -- LTE example
 
-import public Language.Reflection
+import public Derive.Common
 %language ElabReflection
 
 -- Tooling for basic interfaces of Enumeration types, e.g. data Foo = Biz | Baz
@@ -16,43 +16,6 @@ import public Language.Reflection
 -- the compile time, best to place your types you're deriving for into a module
 -- that doesn't change often.
 
-
-
--------------------------------------------------
--- Helpers, moving these to another module breaks Elaboration :S
--------------------------------------------------
-
--- nat casting is slow
-intLength : List a -> Int
-intLength = foldl (\xs,_ => 1 + xs) 0
-
-nameStr : Name -> String
-nameStr (UN x) = x
-nameStr (MN x y) = x
-nameStr (NS xs x) = nameStr x
-nameStr (DN x y) = x
-
-eFC : FC
-eFC = EmptyFC
-
-guard : Bool -> String -> Elab ()
-guard p s = if p then pure () else fail s
-
-lookupType : Name -> Elab (Name, TTImp)
-lookupType n = do
-  [res@(qname,ttimp)] <- getType n
-    | _ => fail $ show n ++ " is not unique in scope."
-  pure res
-
-constructors : Name -> Elab (List (Name, TTImp))
-constructors x = do
-  cons <- getCons x
-  for cons lookupType
- 
-conNames : Name -> Elab (List Name)
-conNames x = map fst <$> constructors x
-
--------------------------------------------------
 
 checkList : List a -> List b -> Elab ()
 checkList xs ys =

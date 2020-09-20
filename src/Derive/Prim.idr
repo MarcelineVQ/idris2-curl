@@ -1,32 +1,12 @@
 module Derive.Prim
 
-import public Language.Reflection
+import public Derive.Common
 %language ElabReflection
 
 -- Derivations for common prim creation needs Use of this module automatically
 -- imports Language.Reflection and requires %language ElabReflection to be
 -- enabled below your imports.
 -- Examples at module bottom
-
--------------------------------------------------
--- Helpers, moving these to another module breaks Elaboration :S
--------------------------------------------------
-
-eFC : FC
-eFC = EmptyFC
-
-toIVar : Name -> TTImp
-toIVar = IVar eFC
-
-toIBindVar : String -> TTImp
-toIBindVar = IBindVar eFC
-
-public export
-argCount : TTImp -> Nat
-argCount (IPi _ _ _ _ _ retty) = S (argCount retty)
-argCount retty = Z
-
--------------------------------------------------
 
 {-
    makeHasIO "what" Private ["c:foo","javascript:borp"]

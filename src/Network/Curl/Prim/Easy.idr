@@ -109,45 +109,93 @@ eSetOptPrim opt = do
   z <- quote (paramType opt)
   let ty = MkTy EmptyFC name `(Ptr HandlePtr -> Int -> ~z -> PrimIO Int)
   let claim = IClaim EmptyFC MW Private
-                [ForeignFn ["C:curl_multi_setopt,libcurl,curl/curl.h"]] ty
+                [ForeignFn ["C:curl_easy_setopt,libcurl,curl/curl.h"]] ty
   declare [claim] -- generate prim
   check (IVar EmptyFC name) -- insert prim's name
 
-
+||| It's kind of unfortunate we need to case all of these `opt` when the code
+||| used on them is exactly the same and while it could be done with elaboration
+||| it's not really worth the work. Users shouldn't actually be exposed to this
+||| definition to be scared away by it anyway.
 export
 curl_easy_setopt : HasIO io => CurlHandle Easy -> {ty : _}
                 -> (opt : CurlEOption ty) -> paramType opt -> io CurlECode
-curl_easy_setopt (MkH h) opt@CURLOPT_WRITEFUNCTION v
-  = ?fewfsdf
-curl_easy_setopt (MkH h) opt@CURLOPT_READFUNCTION v
-  = ?dsfd2s
-curl_easy_setopt (MkH h) opt@CURLOPT_PROGRESSFUNCTION v = ?ds3fds
-curl_easy_setopt (MkH h) opt@CURLOPT_HEADERFUNCTION v = ?dsfd4s
-curl_easy_setopt (MkH h) opt@CURLOPT_DEBUGFUNCTION v = ?dsfds5
-curl_easy_setopt (MkH h) opt@CURLOPT_SSL_CTX_FUNCTION v = ?dsf6ds
-curl_easy_setopt (MkH h) opt@CURLOPT_IOCTLFUNCTION v = ?dsfds7
-curl_easy_setopt (MkH h) opt@CURLOPT_CONV_FROM_NETWORK_FUNCTION v = ?dsfds8
-curl_easy_setopt (MkH h) opt@CURLOPT_CONV_TO_NETWORK_FUNCTION v = ?dsfds9
-curl_easy_setopt (MkH h) opt@CURLOPT_CONV_FROM_UTF8_FUNCTION v = ?dsfds14
-curl_easy_setopt (MkH h) opt@CURLOPT_SOCKOPTFUNCTION v = ?dsfds2
-curl_easy_setopt (MkH h) opt@CURLOPT_OPENSOCKETFUNCTION v = ?dsf3ds
-curl_easy_setopt (MkH h) opt@CURLOPT_SEEKFUNCTION v = ?dsfds412
-curl_easy_setopt (MkH h) opt@CURLOPT_SSH_KEYFUNCTION v = ?dsfd2s123
-curl_easy_setopt (MkH h) opt@CURLOPT_INTERLEAVEFUNCTION v = ?ds1fds
-curl_easy_setopt (MkH h) opt@CURLOPT_CHUNK_BGN_FUNCTION v = ?ds4fds
-curl_easy_setopt (MkH h) opt@CURLOPT_CHUNK_END_FUNCTION v = ?dsf786ds
-curl_easy_setopt (MkH h) opt@CURLOPT_FNMATCH_FUNCTION v = ?dsfds3
-curl_easy_setopt (MkH h) opt@CURLOPT_CLOSESOCKETFUNCTION v = ?ds4f123ds
-curl_easy_setopt (MkH h) opt@CURLOPT_XFERINFOFUNCTION v = ?dsf1ds
-curl_easy_setopt (MkH h) opt@CURLOPT_RESOLVER_START_FUNCTION v = ?ds231fds
-curl_easy_setopt (MkH h) opt@CURLOPT_TRAILERFUNCTION v = ?dsf1ds12
-curl_easy_setopt (MkH h) opt@CURLOPT_LASTENTRY v = ?Fewf
-curl_easy_setopt {ty = CURLOPTTYPE_LONG} (MkH h) opt v = ?asFewf_1
-curl_easy_setopt {ty = CURLOPTTYPE_OBJECTPOINT} (MkH h) opt v = ?asFewf_2
-curl_easy_setopt {ty = CURLOPTTYPE_OFF_T} (MkH h) opt v = ?asFewf_4
-curl_easy_setopt {ty = CURLOPTTYPE_BLOB} (MkH h) opt v = ?asFewf_5
-curl_easy_setopt {ty = CURLOPTTYPE_FUNCTIONPOINT} (MkH h) opt v = do
-  ?asFewf_3
+curl_easy_setopt (MkH h) opt@CURLOPT_WRITEFUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_READFUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_PROGRESSFUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_HEADERFUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_DEBUGFUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_SSL_CTX_FUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_IOCTLFUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_CONV_FROM_NETWORK_FUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_CONV_TO_NETWORK_FUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_CONV_FROM_UTF8_FUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_SOCKOPTFUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_OPENSOCKETFUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_SEEKFUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_SSH_KEYFUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_INTERLEAVEFUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_CHUNK_BGN_FUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_CHUNK_END_FUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_FNMATCH_FUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_CLOSESOCKETFUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_XFERINFOFUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_RESOLVER_START_FUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt (MkH h) opt@CURLOPT_TRAILERFUNCTION v = do
+      let prim = eSetOptPrim opt
+      pure (unsafeFromCode !(primIO $ prim h (toCode opt) v))
+curl_easy_setopt {ty = CURLOPTTYPE_LONG} (MkH h) opt v = pure $
+  unsafeFromCode !(primIO $ prim_curl_easy_setopt_long h (toCode opt) v)
+curl_easy_setopt {ty = CURLOPTTYPE_OBJECTPOINT} (MkH h) opt v = pure $
+  unsafeFromCode !(primIO $ prim_curl_easy_setopt_objptr h (toCode opt) v)
+curl_easy_setopt {ty = CURLOPTTYPE_OFF_T} (MkH h) opt v = pure $
+  unsafeFromCode !(primIO $ prim_curl_easy_setopt_off_t h (toCode opt) v)
+curl_easy_setopt {ty = CURLOPTTYPE_BLOB} (MkH h) opt v = pure $
+  unsafeFromCode !(primIO $ prim_curl_easy_setopt_blob h (toCode opt) v)
+curl_easy_setopt {ty = UnusedOptType} _ _ _ = pure CURLE_UNKNOWN_OPTION
+--                      ^can't happen during normal use
 
 -------------------------------------------------
 

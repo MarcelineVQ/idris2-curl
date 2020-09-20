@@ -98,6 +98,9 @@ prim_curl_multi_setopt : Ptr HandlePtr -> Int -> any -> PrimIO CurlECode
 -- then use it. It wasn't happy about being placed directly where `prim` is
 -- used instead of with the let. Possibly this is a parsing issue wih %runElab
 -- or my own misunderstanding.
+-- I'd like to have this take IO instead of PrimIO so users don't have to write
+-- toPrim but it's a fair bit more involved to massage the types since the ffi
+-- expects PrimIO
 %macro
 mSetOptPrim : {opty : _} -> (opt : CurlMOption opty)
            -> Elab (Ptr HandlePtr -> Int -> paramType opt -> PrimIO Int)
@@ -134,7 +137,8 @@ curl_multi_setopt {ty = CURLOPTTYPE_OFF_T} (MkH h) opt v = pure $
     unsafeFromCode !(primIO $ prim_curl_multi_setopt_off_t h (toCode opt) v)
 curl_multi_setopt {ty = CURLOPTTYPE_BLOB} (MkH h) opt v = pure $
     unsafeFromCode !(primIO $ prim_curl_multi_setopt_blob h (toCode opt) v)
-curl_multi_setopt {ty = UnusedOptType} _ _ _ = pure CURLM_UNKNOWN_OPTION -- can't happen
+curl_multi_setopt {ty = UnusedOptType} _ _ _ = pure CURLM_UNKNOWN_OPTION
+--                      ^can't happen during normal use
 
 useoptest : IO ()
 useoptest = do

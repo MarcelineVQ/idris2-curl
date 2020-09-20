@@ -180,11 +180,14 @@ export
 Ord CurlECode where
   compare = compareEnum
 
+curlECodeEnumList : List Int
+curlECodeEnumList = [0..96]
+
 export
 ToCode CurlECode where
-  toCode = enumTo [0..96]
+  toCode = enumTo curlECodeEnumList
 
 export
 FromCode CurlECode where
-  unsafeFromCode = unsafeEnumFrom [0..96]
-  fromCode = enumFrom [0..96]
+  unsafeFromCode = unsafeEnumFrom curlECodeEnumList
+  fromCode = enumFrom curlECodeEnumList

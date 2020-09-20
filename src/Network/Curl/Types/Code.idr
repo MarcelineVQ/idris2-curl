@@ -7,7 +7,7 @@ interface ToCode a where
   toCode : a -> Int
 
 ||| Providing a mapping from Int to constructor.
-||| Two ways in case you are certain the Int has a mapping.
+||| Two ways in case you are certain the Int has a mapping
 public export
 interface FromCode a where
   unsafeFromCode : Int -> a

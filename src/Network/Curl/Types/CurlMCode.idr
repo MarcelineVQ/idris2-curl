@@ -38,11 +38,14 @@ export
 Ord CurlMCode where
   compare = compareEnum
 
+curlMCodeEnumList : List Int
+curlMCodeEnumList = [(-1)] ++ [0..11]
+
 export
 ToCode CurlMCode where
-  toCode = enumTo $ [(-1)] ++ [0..11]
+  toCode = enumTo curlMCodeEnumList
 
 export
 FromCode CurlMCode where
-  unsafeFromCode = unsafeEnumFrom $ [(-1)] ++ [0..11]
-  fromCode = enumFrom $ [(-1)] ++ [0..11]
+  unsafeFromCode = unsafeEnumFrom curlMCodeEnumList
+  fromCode = enumFrom curlMCodeEnumList

@@ -1,6 +1,6 @@
 module Derive.Newtype
 
-import Language.Reflection
+import public Derive.Common
 %language ElabReflection
 
 -- Derivaton of newtypes, datatypes with a single constructor and single field.
@@ -8,39 +8,6 @@ import Language.Reflection
 
 -- Some common typeclass methods are provided as well. Technically newtype could
 -- derive any typeclass its constituent has but that is a little more involved.
-
--------------------------------------------------
--- Helpers, moving these to another module breaks Elaboration :S
--------------------------------------------------
-
-eFC : FC
-eFC = EmptyFC
-
-nameStr : Name -> String
-nameStr (UN x) = x
-nameStr (MN x y) = x
-nameStr (NS xs x) = nameStr x
-nameStr (DN x y) = x
-
-mapName : (String -> String) -> Name -> Name
-mapName f (UN x) = UN (f x)
-mapName f (MN x y) = MN (f x) y
-mapName f (NS x y) = NS x (mapName f y)
-mapName f (DN x y) = DN (f x) y
-
-guard : Bool -> String -> Elab ()
-guard p s = if p then pure () else fail s
-
-lookupType : Name -> Elab (Name, TTImp)
-lookupType n = do
-  [res@(qname,ttimp)] <- getType n
-    | _ => fail $ show n ++ " is not unique in scope."
-  pure res
-
-constructors : Name -> Elab (List (Name, TTImp))
-constructors x = do
-  cons <- getCons x
-  for cons lookupType
 
 newtypeName : TTImp -> Maybe Name
 newtypeName (IVar _ n) = Just n
