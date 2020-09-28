@@ -15,11 +15,11 @@ data OptType
   | CURLOPTTYPE_FUNCTIONPOINT -- void*  -- 20000
   | CURLOPTTYPE_OFF_T -- int64          -- 30000
   | CURLOPTTYPE_BLOB -- ???             -- 40000
-  -- | CURLOPTTYPE_STRINGPOINT -- char*    -- 10000 -- aliases for OBJECTPOINT
+  | CURLOPTTYPE_STRINGPOINT -- char*    -- 10000 -- aliases for OBJECTPOINT, useful for foreign decls
   -- | CURLOPTTYPE_SLISTPOINT              -- 10000 -- aliases for OBJECTPOINT
 
 curlOptTypeEnumList : List Int
-curlOptTypeEnumList = [-10,0,10000,20000,30000,40000]
+curlOptTypeEnumList = [-10,0,10000,20000,30000,40000,10000]
 
 export
 ToCode OptType where
@@ -37,3 +37,4 @@ optType CURLOPTTYPE_OBJECTPOINT = AnyPtr
 optType CURLOPTTYPE_FUNCTIONPOINT = AnyPtr
 optType CURLOPTTYPE_OFF_T = Bits64 -- maybe
 optType CURLOPTTYPE_BLOB = Buffer -- I truly don't know what a blob is
+optType CURLOPTTYPE_STRINGPOINT = String

@@ -34,14 +34,8 @@ import Network.Curl.Types
 import Derive.Prim
 %language ElabReflection
 
--- curl_easy_cleanup
-%runElab makeHasIO "curl_easy_cleanup" Export
-          `[ %foreign "C:curl_easy_cleanup,libcurl,curl/curl.h"
-             export
-             prim_curl_easy_cleanup : Ptr HandlePtr -> PrimIO () ] --`
 
 -------------------------------------------------
-
 
 -- curl_easy_duphandle
 %runElab makeHasIO "curl_easy_duphandle" Export
@@ -64,12 +58,14 @@ curl_easy_init = do r <- primIO prim_curl_easy_init
 -------------------------------------------------
 
 
--- %foreign "C:curl_easy_cleanup,libcurl,curl/curl.h"
--- prim_curl_easy_cleanup : Ptr HandlePtr -> PrimIO ()
--- 
--- export
--- curl_easy_cleanup : HasIO io => CurlHandle Easy -> io ()
--- curl_easy_cleanup (MkH ptr) = primIO (prim_curl_easy_cleanup ptr)
+%foreign "C:curl_easy_cleanup,libcurl,curl/curl.h"
+prim_curl_easy_cleanup : Ptr HandlePtr -> PrimIO ()
+
+export
+curl_easy_cleanup : HasIO io => CurlHandle Easy -> io ()
+curl_easy_cleanup (MkH h) = primIO $ prim_curl_easy_cleanup h
+
+
 
 -- It's just a lookup, expect this to work unless curl itself is broken
 %foreign "C:curl_easy_strerror,libcurl,curl/curl.h"
@@ -93,6 +89,9 @@ prim_curl_easy_setopt_off_t : Ptr HandlePtr -> Int -> Bits64 -> PrimIO Int
 
 %foreign "C:curl_easy_setopt,libcurl,curl/curl.h"
 prim_curl_easy_setopt_blob : Ptr HandlePtr -> Int -> Buffer -> PrimIO Int
+
+%foreign "C:curl_easy_setopt,libcurl,curl/curl.h"
+prim_curl_easy_setopt_string : Ptr HandlePtr -> Int -> String -> PrimIO Int
 
 -- This is to fill the role of
 {-
@@ -195,6 +194,8 @@ curl_easy_setopt {ty = CURLOPTTYPE_OFF_T} (MkH h) opt v = pure $
   unsafeFromCode !(primIO $ prim_curl_easy_setopt_off_t h (toCode opt) v)
 curl_easy_setopt {ty = CURLOPTTYPE_BLOB} (MkH h) opt v = pure $
   unsafeFromCode !(primIO $ prim_curl_easy_setopt_blob h (toCode opt) v)
+curl_easy_setopt {ty = CURLOPTTYPE_STRINGPOINT} (MkH h) opt v = pure $
+  unsafeFromCode !(primIO $ prim_curl_easy_setopt_string h (toCode opt) v)
 curl_easy_setopt {ty = UnusedOptType} _ _ _ = pure CURLE_UNKNOWN_OPTION
 --                      ^can't happen during normal use
 

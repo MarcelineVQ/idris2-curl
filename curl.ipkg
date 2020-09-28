@@ -1,7 +1,7 @@
 package curl
 
 authors    = "MarcelineVQ"
-version    = "0.13.3.0"
+version    = "0.14.3.0"
 readme     = "README.md"
 
 homepage   = "https://github.com/MarcelineVQ/idris2-curl"
@@ -29,6 +29,8 @@ modules =
   , Network.Curl.Types.OptType
   , Network.Curl.Types.CurlEOption
   , Network.Curl.Types.CurlMOption
+  , Network.Curl.Types.Handle
+  , Network.Curl.Types.SSL
 
   , Network.Curl.Prim
   , Network.Curl.Prim.Easy
