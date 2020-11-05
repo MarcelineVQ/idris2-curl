@@ -29,6 +29,7 @@ nameStr (UN x) = x
 nameStr (MN x y) = x
 nameStr (NS xs x) = nameStr x
 nameStr (DN x y) = x
+nameStr (RF n) = n
 
 export
 mapName : (String -> String) -> Name -> Name
@@ -36,6 +37,7 @@ mapName f (UN x) = UN (f x)
 mapName f (MN x y) = MN (f x) y
 mapName f (NS x y) = NS x (mapName f y)
 mapName f (DN x y) = DN (f x) y
+mapName f (RF n) = RF (f n)
 
 export
 lookupType : Name -> Elab (Name, TTImp)
