@@ -1,5 +1,6 @@
 .git/
 build/
+examples/build/
 *.so
 *.o
 *.a
