@@ -5,18 +5,12 @@ import Data.IORef
 import Data.Buffer
 import Network.Curl.Easy
 
-partial
-expect : String -> (1 _ : Maybe t) -> t
-expect msg Nothing = idris_crash msg
-expect msg (Just val) = val
-
 writeFunction : Buffer -> (len : Int) -> IORef (List Buffer) -> PrimIO Int
 writeFunction buf len ref = toPrim $ do
     lst <- readIORef ref
     writeIORef ref $ lst ++ [buf]
     rawSize buf
 
-partial
 main : IO ()
 main = do
     CURLE_OK <- curl_global_init | c => do
@@ -37,7 +31,7 @@ main = do
 
     buffers <- readIORef ref
     putStrLn $ "rawSize buffers = " ++ show (length buffers)
-    let buffer = expect "concatBuffers returned Nothing" !(concatBuffers buffers)
+    Just buffer <- concatBuffers buffers | Nothing => putStrLn "concatBuffers returned Nothing"
     bufferSize <- rawSize buffer
     body <- getString buffer 0 bufferSize
     putStrLn body
