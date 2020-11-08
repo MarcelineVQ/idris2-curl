@@ -6,3 +6,4 @@ examples/build/
 *.a
 *.tcc
 *.ttm
+**.log
