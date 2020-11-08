@@ -10,7 +10,6 @@ expect : String -> (1 _ : Maybe t) -> t
 expect msg Nothing = idris_crash msg
 expect msg (Just val) = val
 
-partial
 writeFunction : Buffer -> (len : Int) -> IORef (List Buffer) -> PrimIO Int
 writeFunction buf len ref = toPrim $ do
     lst <- readIORef ref
@@ -42,7 +41,8 @@ main = do
     bufferSize <- rawSize buffer
     body <- getString buffer 0 bufferSize
     putStrLn body
-    freeBuffer buffer
+    -- traverse freeBuffer buffers
+    -- freeBuffer buffer
 
     curlEasyCleanup cli
     curl_global_cleanup
