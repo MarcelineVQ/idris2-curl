@@ -28,6 +28,6 @@ curl_global_init : HasIO io => io CurlECode
 curl_global_init = unsafeFromCode <$> primIO (prim_curl_global_init 3)
 
 %runElab makeHasIO "curl_global_cleanup" Export
-          `[ %foreign "C:curl_global_init,libcurl,curl/curl.h"
+          `[ %foreign "C:curl_global_cleanup,libcurl,curl/curl.h"
              export
              prim_curl_global_cleanup : PrimIO () ] --`
