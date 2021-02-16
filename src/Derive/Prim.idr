@@ -26,13 +26,13 @@ import public Derive.Common
 export
 makeHasIO : String -> Visibility -> List Decl -> Elab ()
 makeHasIO funname0 vis ys = do
-    [pclaim@(IClaim pfc pmw pvis _ pty@(MkTy tyfc namefc primname primty))] <- pure ys
+    [pclaim@(IClaim pfc pmw pvis _ pty@(MkTy tyfc primname primty))] <- pure ys
       | _ => fail "bad format"
     let funty = IPi eFC MW AutoImplicit Nothing
                `(HasIO ~(IBindVar eFC "io"))
                (spiderType primty)
         funname = UN funname0
-        funclaim = IClaim eFC pmw vis [] (MkTy tyfc namefc funname funty)
+        funclaim = IClaim eFC pmw vis [] (MkTy tyfc funname funty)
         varnames = map (("var" ++) . show) [0..]
         lvars = IBindVar eFC <$> take (argCount primty) varnames
         rvars = toIVar . UN <$> take (argCount primty) varnames

@@ -1,7 +1,6 @@
 module Derive.Newtype
 
 import public Derive.Common
-import        Util
 %language ElabReflection
 
 -- Derivaton of newtypes, datatypes with a single constructor and single field.
@@ -51,8 +50,8 @@ export
 newtype : String -> Visibility -> TTImp -> Elab ()
 newtype name0 vis ty = do
     name <- inCurrentNS (UN name0)
-    let con = MkTy eFC (getTTImpFC ty) (mapName ("Mk" ++) name) `(~ty -> ~(IVar eFC name))
-    let decl = IData eFC vis $ MkData eFC name (IType eFC) [] [con]
+    let con = MkTy (getTTImpFC ty) (mapName ("Mk" ++) name) `(~ty -> ~(IVar eFC name))
+    let decl = IData (getTTImpFC ty) vis $ MkData eFC name (IType eFC) [] [con]
     declare [decl]
 -- e.g `[  ~foo : Type where
 --           ~mkfoo : ~ty -> ~foo ]

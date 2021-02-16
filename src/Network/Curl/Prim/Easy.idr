@@ -107,7 +107,7 @@ eSetOptPrim opt = do
   let name = UN $ "setOptPrim_" ++ show opt
   z <- quote (paramType opt)
   str <- quote "C:curl_easy_setopt,libcurl,curl/curl.h"
-  let ty = MkTy EmptyFC EmptyFC name `(Ptr HandlePtr -> Int -> ~z -> PrimIO Int)
+  let ty = MkTy EmptyFC name `(Ptr HandlePtr -> Int -> ~z -> PrimIO Int)
   let claim = IClaim EmptyFC MW Private
                 [ForeignFn [str]] ty
   declare [claim] -- generate prim
