@@ -60,3 +60,36 @@ export
 argCount : TTImp -> Nat
 argCount (IPi _ _ _ _ _ retty) = S (argCount retty)
 argCount retty = Z
+
+export
+getTTImpFC : TTImp -> FC
+getTTImpFC (IVar fc _) = fc
+getTTImpFC (IPi fc _ _ _ _ _) = fc
+getTTImpFC (ILam fc _ _ _ _ _) = fc
+getTTImpFC (ILet fc _ _ _ _ _ _) = fc
+getTTImpFC (ICase fc _ _ _) = fc
+getTTImpFC (ILocal fc _ _) = fc
+getTTImpFC (IUpdate fc _ _) = fc
+getTTImpFC (IApp fc _ _) = fc
+getTTImpFC (INamedApp fc _ _ _) = fc
+getTTImpFC (IAutoApp fc _ _) = fc
+getTTImpFC (IWithApp fc _ _) = fc
+getTTImpFC (ISearch fc _) = fc
+getTTImpFC (IAlternative fc _ _) = fc
+getTTImpFC (IRewrite fc _ _) = fc
+getTTImpFC (IBindHere fc _ _) = fc
+getTTImpFC (IBindVar fc _) = fc
+getTTImpFC (IAs fc _ _ _ _) = fc
+getTTImpFC (IMustUnify fc _ _) = fc
+getTTImpFC (IDelayed fc _ _) = fc
+getTTImpFC (IDelay fc _) = fc
+getTTImpFC (IForce fc _) = fc
+getTTImpFC (IQuote fc _) = fc
+getTTImpFC (IQuoteName fc _) = fc
+getTTImpFC (IQuoteDecl fc _) = fc
+getTTImpFC (IUnquote fc _) = fc
+getTTImpFC (IPrimVal fc _) = fc
+getTTImpFC (IType fc) = fc
+getTTImpFC (IHole fc _) = fc
+getTTImpFC (Implicit fc _) = fc
+getTTImpFC (IWithUnambigNames fc _ _) = fc
