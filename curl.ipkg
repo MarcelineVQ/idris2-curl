@@ -1,50 +1,33 @@
-package curl
+package curl-0_16_3_0
 
-authors    = "MarcelineVQ"
-version    = "0.16.3.0"
-readme     = "README.md"
+sourcedir   = "src"
 
-homepage   = "https://github.com/MarcelineVQ/idris2-curl"
-sourceloc  = "https://github.com/MarcelineVQ/idris2-curl.git"
-bugtracker = "https://github.com/MarcelineVQ/idris2-curl/issues"
+depends     = base
+            , contrib
+            , network
+            , managed
 
-license    = "CC0 (refer to LICENSE file)"
-brief      = "Curl bindings developed for libcurl 7.71.1+"
-
-modules =
- -- Public
-    Network.Curl.Easy
-  , Network.Curl.Multi
-  , Network.Curl.Global
-  , Network.Curl.Types
-
-  , Derive.Enum
-  , Derive.Prim
-  , Derive.Newtype
-  , Derive.Common
-
- -- Private
-  , Network.Curl.Types.Code
-  , Network.Curl.Types.CurlECode
-  , Network.Curl.Types.CurlMCode
-  , Network.Curl.Types.OptType
-  , Network.Curl.Types.CurlEOption
-  , Network.Curl.Types.CurlMOption
-  , Network.Curl.Types.Handle
-  , Network.Curl.Types.SSL
-
-  , Network.Curl.Prim
-  , Network.Curl.Prim.Easy
-  , Network.Curl.Prim.Global
-  -- , Network.Curl.Prim.Mem
-  , Network.Curl.Prim.Multi
-  , Network.Curl.Prim.Mime
-  , Network.Curl.Prim.Other
-  
-  , Util
-
-sourcedir = "src"
-
--- main = Network.Curl.Prim
-
-depends = base, contrib, network, managed
+modules     = Derive.Common
+            , Derive.Enum
+            , Derive.Newtype
+            , Derive.Prim
+            , Network.Curl.Easy
+            , Network.Curl.Global
+            , Network.Curl.Multi
+            , Network.Curl.Network
+            , Network.Curl.Prim
+            , Network.Curl.Prim.Easy
+            , Network.Curl.Prim.Global
+            , Network.Curl.Prim.Mime
+            , Network.Curl.Prim.Multi
+            , Network.Curl.Prim.Other
+            , Network.Curl.Types
+            , Network.Curl.Types.Code
+            , Network.Curl.Types.CurlECode
+            , Network.Curl.Types.CurlEOption
+            , Network.Curl.Types.CurlMCode
+            , Network.Curl.Types.CurlMOption
+            , Network.Curl.Types.Handle
+            , Network.Curl.Types.OptType
+            , Network.Curl.Types.SSL
+            , Util
