@@ -6,6 +6,14 @@ This will provide the Easy interface of direct all-at-once actions and the Multi
 
 Further this will provide methods to use curl as a replacement for Idris' `network` package when used for internet connections.
 
+Installation
+------------
+You can install via idris2 directly:  
+`idris2 --install package.ipkg`  
+Or via the Makefile:  
+`make install`  
+Or via the [sae tool](https://github.com/DoctorRyner/sae):
+`sae-linux install`
 
 Version
 -------

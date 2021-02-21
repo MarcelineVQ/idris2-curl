@@ -5,9 +5,12 @@ depends:
 - base
 - contrib
 - network
-- managed
 
-sources:
-- name: managed
-  url: https://github.com/MarcelineVQ/idris2-managed
-  version: 5a33c02fe349bd0f56ef64dbcedeeb3e94607a1c
+# managed not currently used
+
+#- managed-0.1.3.3
+
+#sources:
+#- name: managed
+#  url: https://github.com/MarcelineVQ/idris2-managed
+#  version: 103e9d74409423dd2bf17484e4bd88e0a8f20a71
