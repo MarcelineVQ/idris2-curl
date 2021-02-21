@@ -10,4 +10,4 @@ depends:
 sources:
 - name: managed
   url: https://github.com/MarcelineVQ/idris2-managed
-  version: 0fda14429af262b04cb8194041cc176a9b24d17d
+  version: 5a33c02fe349bd0f56ef64dbcedeeb3e94607a1c
